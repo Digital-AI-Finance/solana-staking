@@ -9,6 +9,38 @@ from typing import Tuple, Dict
 from utils import RISK_FREE_RATE, SOL_VOLATILITY
 
 
+class OptionInputError(ValueError):
+    """Exception for invalid option inputs."""
+    pass
+
+
+def validate_inputs(S: float, K: float, T: float, r: float, sigma: float,
+                    allow_zero_time: bool = True) -> None:
+    """
+    Validate Black-Scholes input parameters.
+
+    Parameters:
+        S: Current spot price
+        K: Strike price
+        T: Time to maturity (years)
+        r: Risk-free rate
+        sigma: Volatility (annualized)
+        allow_zero_time: If True, T=0 is allowed (for intrinsic value)
+
+    Raises:
+        OptionInputError: If any input is invalid
+    """
+    if S <= 0:
+        raise OptionInputError(f"Spot price must be positive, got S={S}")
+    if K <= 0:
+        raise OptionInputError(f"Strike price must be positive, got K={K}")
+    if T < 0 or (not allow_zero_time and T == 0):
+        raise OptionInputError(f"Time to maturity must be non-negative, got T={T}")
+    if sigma < 0:
+        raise OptionInputError(f"Volatility must be non-negative, got sigma={sigma}")
+    # Note: r can be negative (some markets have negative rates)
+
+
 def d1(S: float, K: float, T: float, r: float, sigma: float) -> float:
     """
     Calculate d1 parameter for Black-Scholes.
@@ -50,7 +82,7 @@ def d2(S: float, K: float, T: float, r: float, sigma: float) -> float:
 
 
 def call_price(S: float, K: float, T: float, r: float = RISK_FREE_RATE,
-               sigma: float = SOL_VOLATILITY) -> float:
+               sigma: float = SOL_VOLATILITY, validate: bool = True) -> float:
     """
     Calculate European call option price using Black-Scholes.
 
@@ -62,10 +94,17 @@ def call_price(S: float, K: float, T: float, r: float = RISK_FREE_RATE,
         T: Time to maturity (years)
         r: Risk-free rate
         sigma: Volatility
+        validate: If True, validate inputs before calculation
 
     Returns:
         Call option price
+
+    Raises:
+        OptionInputError: If validate=True and inputs are invalid
     """
+    if validate:
+        validate_inputs(S, K, T, r, sigma)
+
     if T <= 0:
         return max(S - K, 0)
 
@@ -76,7 +115,7 @@ def call_price(S: float, K: float, T: float, r: float = RISK_FREE_RATE,
 
 
 def put_price(S: float, K: float, T: float, r: float = RISK_FREE_RATE,
-              sigma: float = SOL_VOLATILITY) -> float:
+              sigma: float = SOL_VOLATILITY, validate: bool = True) -> float:
     """
     Calculate European put option price using Black-Scholes.
 
@@ -88,10 +127,17 @@ def put_price(S: float, K: float, T: float, r: float = RISK_FREE_RATE,
         T: Time to maturity (years)
         r: Risk-free rate
         sigma: Volatility
+        validate: If True, validate inputs before calculation
 
     Returns:
         Put option price
+
+    Raises:
+        OptionInputError: If validate=True and inputs are invalid
     """
+    if validate:
+        validate_inputs(S, K, T, r, sigma)
+
     if T <= 0:
         return max(K - S, 0)
 

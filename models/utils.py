@@ -27,12 +27,14 @@ VOTE_TX_FEE = 0.000005  # SOL per vote transaction
 DAILY_VOTE_COST_SOL = 1.1  # ~1.1 SOL/day
 ANNUAL_VOTE_COST_SOL = 400  # ~400 SOL/year
 
-# LST Market Share (2025)
+# LST Market Share (2025) - Shares based on TVL proportions
+# Total LST TVL: ~40M SOL
 LST_MARKET = {
-    'Jito (JitoSOL)': {'share': 0.76, 'tvl_sol': 17_600_000},
-    'Marinade (mSOL)': {'share': 0.22, 'tvl_sol': 5_280_000},
-    'Jupiter (jupSOL)': {'share': 0.05, 'tvl_sol': 3_880_000},
-    'Binance (bnSOL)': {'share': 0.10, 'tvl_sol': 8_160_000},
+    'Jito (JitoSOL)': {'share': 0.44, 'tvl_sol': 17_600_000},      # 17.6M / 40M = 44%
+    'Binance (bnSOL)': {'share': 0.204, 'tvl_sol': 8_160_000},     # 8.16M / 40M = 20.4%
+    'Marinade (mSOL)': {'share': 0.132, 'tvl_sol': 5_280_000},     # 5.28M / 40M = 13.2%
+    'Jupiter (jupSOL)': {'share': 0.097, 'tvl_sol': 3_880_000},    # 3.88M / 40M = 9.7%
+    'Other LSTs': {'share': 0.127, 'tvl_sol': 5_080_000},          # Remainder
 }
 
 # MEV Parameters (Jito)

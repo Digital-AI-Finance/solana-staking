@@ -170,11 +170,13 @@
                 maxLoss = (strike - putPremium) * holdings;
                 breakeven = strike - putPremium;
 
+                // Short put Greeks: positive delta, negative gamma/vega, positive theta
                 posDelta = holdings * (1 - deltaCall(currentPrice, strike, T, r, iv));
-                posGamma = holdings * gamma(currentPrice, strike, T, r, iv);
-                posTheta = holdings * thetaCall(currentPrice, strike, T, r, iv);
-                posVega = holdings * vega(currentPrice, strike, T, r, iv);
+                posGamma = -holdings * gamma(currentPrice, strike, T, r, iv);
+                posTheta = -holdings * thetaCall(currentPrice, strike, T, r, iv);
+                posVega = -holdings * vega(currentPrice, strike, T, r, iv);
             } else {
+                // Collar: Long stock + Short call + Long put
                 const putStrike = currentPrice * 0.85;
                 const callPremium = blackScholesCall(currentPrice, strike, T, r, iv);
                 const putPremium = blackScholesPut(currentPrice, putStrike, T, r, iv);
@@ -183,10 +185,21 @@
                 maxLoss = (currentPrice - putStrike + callPremium - putPremium) * holdings;
                 breakeven = currentPrice - callPremium + putPremium;
 
-                posDelta = holdings * (1 - deltaCall(currentPrice, strike, T, r, iv) + (1 - deltaCall(currentPrice, putStrike, T, r, iv)));
-                posGamma = 0;
-                posTheta = 0;
-                posVega = 0;
+                // Collar Greeks: delta = delta_put - delta_call (reduced stock exposure)
+                const callDelta = deltaCall(currentPrice, strike, T, r, iv);
+                const putDelta = deltaCall(currentPrice, putStrike, T, r, iv) - 1;
+                const callGamma = gamma(currentPrice, strike, T, r, iv);
+                const putGamma = gamma(currentPrice, putStrike, T, r, iv);
+                const callTheta = thetaCall(currentPrice, strike, T, r, iv);
+                const putTheta = thetaCall(currentPrice, putStrike, T, r, iv) + r * putStrike * Math.exp(-r * T) * (1 - deltaCall(currentPrice, putStrike, T, r, iv)) / 365;
+                const callVega = vega(currentPrice, strike, T, r, iv);
+                const putVega = vega(currentPrice, putStrike, T, r, iv);
+
+                // Position: +1 stock, -1 call, +1 put
+                posDelta = holdings * (1 - callDelta + putDelta);
+                posGamma = holdings * (-callGamma + putGamma);
+                posTheta = holdings * (-callTheta + putTheta);
+                posVega = holdings * (-callVega + putVega);
             }
 
             // Yield calculations

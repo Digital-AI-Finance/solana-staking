@@ -288,13 +288,11 @@ class AccumulationSimulator:
 
             # Buy SOL
             sol_bought = amount_needed / current_price
-            sol_holdings += sol_bought
             total_invested += amount_needed
 
-            # Apply staking for remaining time
-            remaining_steps = n_steps - step
+            # Apply staking factor to newly bought SOL (from purchase time to end)
             staking_factor = staked_paths[:, n_steps] / staked_paths[:, step]
-            sol_holdings = sol_holdings * staking_factor / (staked_paths[:, step] / staked_paths[:, step])
+            sol_holdings += sol_bought * staking_factor
 
         final_value = sol_holdings * price_paths[:, -1]
 

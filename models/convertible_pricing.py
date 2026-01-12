@@ -201,13 +201,20 @@ class ConvertibleBondPricer:
 
     def breakeven_price(self) -> float:
         """
-        Calculate SOL price at which conversion is profitable.
+        Calculate SOL price at which conversion equals bond floor value.
 
-        Breakeven = Conversion Price * (1 + time_value_decay_factor)
+        At breakeven:
+            conversion_ratio * S_breakeven = bond_floor
+            S_breakeven = bond_floor / conversion_ratio
 
-        Simplified: approximately conversion_price for deep ITM at maturity.
+        This is the price below which the bond floor provides more value
+        than conversion, making the convertible trade like a straight bond.
         """
-        return self.terms.conversion_price
+        t = self.terms
+        bond_floor_value = self.bond_floor(per_1000=True)
+        conversion_ratio = 1000 / t.conversion_price  # SOL per $1000 face
+
+        return bond_floor_value / conversion_ratio
 
     def implied_volatility_from_market(self, market_price: float) -> float:
         """

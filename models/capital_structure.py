@@ -153,13 +153,34 @@ class CapitalStructureOptimizer:
         if debt_to_equity <= 0:
             return 0.0
 
-        # Distance to default (simplified)
-        # Higher leverage -> higher distress probability
-        # Using logistic function for smooth transition
-        dd = 3.0 / (1 + debt_to_equity) - 1.5  # Distance to default proxy
+        # Merton-style Distance to Default
+        # DD = [ln(A/D) + (mu - sigma^2/2)*T] / (sigma * sqrt(T))
+        # Where: A = asset value, D = debt, mu = return, sigma = volatility, T = maturity
 
-        # Convert to probability via normal CDF
         from scipy import stats
+
+        # Asset value = total capital invested
+        debt = p.equity_capital * debt_to_equity
+        asset_value = p.equity_capital + debt
+
+        # Use 5-year horizon (typical convertible maturity)
+        T = 5.0
+
+        # Expected asset return (SOL return + staking)
+        mu = p.sol_expected_return + p.staking_yield
+
+        # Asset volatility
+        sigma = p.sol_volatility
+
+        # Distance to default
+        if debt <= 0:
+            return 0.0
+
+        log_ratio = np.log(asset_value / debt)
+        drift_term = (mu - 0.5 * sigma ** 2) * T
+        dd = (log_ratio + drift_term) / (sigma * np.sqrt(T))
+
+        # Convert to probability via normal CDF (probability that assets < debt)
         prob = stats.norm.cdf(-dd)
 
         return min(prob, 0.5)  # Cap at 50%
