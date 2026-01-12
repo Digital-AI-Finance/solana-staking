@@ -82,6 +82,14 @@
                 </div>
 
                 <div class="form-group">
+                    <label>Risk-Free Rate (%)</label>
+                    <div class="slider-container">
+                        <input type="range" id="riskFreeRate" min="0" max="10" value="4.5" step="0.5">
+                        <span class="slider-value" id="riskFreeRateDisplay">4.5%</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
                     <label>Simulations</label>
                     <div class="slider-container">
                         <input type="range" id="numSims" min="100" max="5000" value="1000" step="100">
@@ -221,6 +229,7 @@
             const mu = parseFloat(document.getElementById('expectedReturn').value) / 100;
             const sigma = parseFloat(document.getElementById('volatility').value) / 100;
             const stakingYield = parseFloat(document.getElementById('stakingYield').value) / 100;
+            const riskFreeRate = parseFloat(document.getElementById('riskFreeRate').value) / 100;
             const numSims = parseInt(document.getElementById('numSims').value);
 
             const S0 = 150; // Current SOL price
@@ -264,7 +273,7 @@
             const var95 = capital - percentile(finalValues, 5);
             const cvar95Vals = finalValues.filter(v => v <= percentile(finalValues, 5));
             const cvar95 = cvar95Vals.length > 0 ? capital - mean(cvar95Vals) : var95;
-            const sharpe = (mean(returns) - 0.045 * T) / std(returns);
+            const sharpe = (mean(returns) - riskFreeRate * T) / std(returns);
 
             // Max drawdown (from paths)
             let maxDD = 0;
@@ -436,6 +445,7 @@
                 { id: 'expectedReturn', displayId: 'expectedReturnDisplay', format: v => v + '%' },
                 { id: 'volatility', displayId: 'volatilityDisplay', format: v => v + '%' },
                 { id: 'stakingYield', displayId: 'stakingYieldDisplay', format: v => v + '%' },
+                { id: 'riskFreeRate', displayId: 'riskFreeRateDisplay', format: v => v + '%' },
                 { id: 'numSims', displayId: 'numSimsDisplay', format: v => formatNumber(v) }
             ];
 

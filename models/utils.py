@@ -250,7 +250,11 @@ def conditional_var(returns: np.ndarray, alpha: float = 0.05) -> float:
         CVaR as positive number (expected loss beyond VaR)
     """
     var = value_at_risk(returns, alpha)
-    return -np.mean(returns[returns <= -var])
+    tail_returns = returns[returns <= -var]
+    if len(tail_returns) == 0:
+        # No returns worse than VaR, return VaR as CVaR
+        return var
+    return -np.mean(tail_returns)
 
 
 if __name__ == "__main__":
