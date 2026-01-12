@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capital Structure Optimizer | SOL Staking</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <nav>
+        <div class="nav-content">
+            <a href="../index.html" class="logo">SOL Staking</a>
+            <div class="nav-links">
+                <a href="../index.html">Home</a>
+                <a href="validator.html">Validator</a>
+                <a href="convertible.html">Convertible</a>
+                <a href="options.html">Options</a>
+                <a href="monte-carlo.html">Monte Carlo</a>
+                <a href="capital-structure.html">Capital Structure</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="calculator-header">
+            <h1>Capital Structure Optimizer</h1>
+            <a href="../index.html" class="btn btn-secondary">Back to Home</a>
+        </div>
+
+        <div class="two-column">
+            <div class="input-section">
+                <h2>Input Parameters</h2>
+
+                <div class="form-group">
+                    <label>Available Equity ($M)</label>
+                    <div class="slider-container">
+                        <input type="range" id="equity" min="10" max="500" value="50" step="10">
+                        <span class="slider-value" id="equityDisplay">$50M</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Max Debt Capacity ($M)</label>
+                    <div class="slider-container">
+                        <input type="range" id="maxDebt" min="0" max="500" value="100" step="10">
+                        <span class="slider-value" id="maxDebtDisplay">$100M</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Cost of Equity (%)</label>
+                    <div class="slider-container">
+                        <input type="range" id="costEquity" min="10" max="50" value="25" step="1">
+                        <span class="slider-value" id="costEquityDisplay">25%</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Base Cost of Debt (%)</label>
+                    <div class="slider-container">
+                        <input type="range" id="costDebt" min="2" max="15" value="6" step="0.5">
+                        <span class="slider-value" id="costDebtDisplay">6%</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Tax Rate (%)</label>
+                    <div class="slider-container">
+                        <input type="range" id="taxRate" min="0" max="40" value="21" step="1">
+                        <span class="slider-value" id="taxRateDisplay">21%</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Current SOL Price ($)</label>
+                    <div class="slider-container">
+                        <input type="range" id="currentPrice" min="50" max="300" value="150" step="5">
+                        <span class="slider-value" id="currentPriceDisplay">$150</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>SOL Target Price ($)</label>
+                    <div class="slider-container">
+                        <input type="range" id="targetPrice" min="100" max="1000" value="300" step="25">
+                        <span class="slider-value" id="targetPriceDisplay">$300</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Expected Staking Yield (%)</label>
+                    <div class="slider-container">
+                        <input type="range" id="stakingYield" min="5" max="12" value="7.5" step="0.5">
+                        <span class="slider-value" id="stakingYieldDisplay">7.5%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="output-section">
+                <h2>Optimal Structure</h2>
+
+                <div class="results-grid">
+                    <div class="result-item">
+                        <div class="label">Optimal D/E Ratio</div>
+                        <div class="value" id="optimalDE">-</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="label">Minimum WACC</div>
+                        <div class="value" id="minWACC">-</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="label">Total Capital</div>
+                        <div class="value" id="totalCapital">-</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="label">SOL Acquirable</div>
+                        <div class="value" id="solAcquirable">-</div>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 20px;">Optimal Allocation</h3>
+                <table>
+                    <tr><td>Equity Used</td><td id="equityUsed">-</td></tr>
+                    <tr><td>Debt Used</td><td id="debtUsed">-</td></tr>
+                    <tr><td>Effective Cost of Debt</td><td id="effectiveCostDebt">-</td></tr>
+                    <tr><td>Leverage Multiple</td><td id="leverageMultiple">-</td></tr>
+                </table>
+
+                <h3 style="margin-top: 20px;">Return Analysis</h3>
+                <table>
+                    <tr><td>Expected ROE</td><td id="expectedROE">-</td></tr>
+                    <tr><td>Interest Coverage</td><td id="interestCoverage">-</td></tr>
+                    <tr><td>Value at Target Price</td><td id="valueAtTarget">-</td></tr>
+                    <tr><td>Equity Return at Target</td><td id="equityReturn">-</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top: 20px;">
+            <h2>WACC Optimization Curve</h2>
+            <div class="chart-container" style="height: 350px;">
+                <canvas id="waccChart"></canvas>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top: 20px;">
+            <h2>Capital Structure Trade-offs</h2>
+            <div class="chart-container" style="height: 300px;">
+                <canvas id="tradeoffChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>SOL Staking Calculator | <a href="https://github.com/Digital-AI-Finance/solana-staking">GitHub</a></p>
+        <p>Modigliani-Miller framework with crypto modifications. All calculations run client-side.</p>
+    </footer>
+
+    <script src="../js/utils.js"></script>
+    <script>
+        let waccChart = null;
+        let tradeoffChart = null;
+
+        function calculate() {
+            const equity = parseFloat(document.getElementById('equity').value) * 1e6;
+            const maxDebt = parseFloat(document.getElementById('maxDebt').value) * 1e6;
+            const costEquity = parseFloat(document.getElementById('costEquity').value) / 100;
+            const baseCostDebt = parseFloat(document.getElementById('costDebt').value) / 100;
+            const taxRate = parseFloat(document.getElementById('taxRate').value) / 100;
+            const currentPrice = parseFloat(document.getElementById('currentPrice').value);
+            const targetPrice = parseFloat(document.getElementById('targetPrice').value);
+            const stakingYield = parseFloat(document.getElementById('stakingYield').value) / 100;
+
+            // Find optimal debt level by minimizing WACC
+            let minWACC = Infinity;
+            let optimalDebt = 0;
+            const waccCurve = [];
+            const debtLevels = [];
+            const taxShields = [];
+            const distressCosts = [];
+
+            for (let debt = 0; debt <= maxDebt; debt += maxDebt / 50) {
+                const deRatio = debt / equity;
+                debtLevels.push(deRatio);
+
+                // Cost of debt increases with leverage (credit spread)
+                const creditSpread = 0.02 * Math.pow(deRatio, 1.5); // Non-linear spread
+                const effectiveCostDebt = baseCostDebt + creditSpread;
+
+                // WACC calculation
+                const totalCapital = equity + debt;
+                const weightEquity = equity / totalCapital;
+                const weightDebt = debt / totalCapital;
+                const wacc = weightEquity * costEquity + weightDebt * effectiveCostDebt * (1 - taxRate);
+
+                waccCurve.push(wacc * 100);
+
+                // Tax shield value
+                const taxShield = taxRate * debt;
+                taxShields.push(taxShield / 1e6);
+
+                // Distress costs (increases rapidly with leverage)
+                const distressProb = Math.min(0.5, 0.01 * Math.pow(deRatio, 2));
+                const distressCost = distressProb * 0.3 * totalCapital;
+                distressCosts.push(distressCost / 1e6);
+
+                if (wacc < minWACC) {
+                    minWACC = wacc;
+                    optimalDebt = debt;
+                }
+            }
+
+            const optimalDE = optimalDebt / equity;
+            const creditSpreadOptimal = 0.02 * Math.pow(optimalDE, 1.5);
+            const effectiveCostDebtOptimal = baseCostDebt + creditSpreadOptimal;
+            const totalCapital = equity + optimalDebt;
+            const solAcquirable = totalCapital / currentPrice;
+
+            // Calculate expected returns
+            const priceReturn = (targetPrice - currentPrice) / currentPrice;
+            const totalReturn = priceReturn + stakingYield;
+            const interestExpense = optimalDebt * effectiveCostDebtOptimal;
+            const stakingIncome = solAcquirable * currentPrice * stakingYield;
+            const interestCoverage = stakingIncome / (interestExpense || 1);
+
+            // Value at target price
+            const valueAtTarget = solAcquirable * targetPrice;
+            const equityValueAtTarget = valueAtTarget - optimalDebt;
+            const equityReturnAtTarget = (equityValueAtTarget - equity) / equity;
+
+            // Expected ROE (leveraged return)
+            const unleveragedReturn = totalReturn;
+            const leveragedReturn = unleveragedReturn + (optimalDebt / equity) * (unleveragedReturn - effectiveCostDebtOptimal);
+
+            // Update display
+            document.getElementById('optimalDE').textContent = optimalDE.toFixed(2) + 'x';
+            document.getElementById('minWACC').textContent = formatPercent(minWACC);
+            document.getElementById('totalCapital').textContent = formatCurrency(totalCapital);
+            document.getElementById('solAcquirable').textContent = formatNumber(solAcquirable, 0) + ' SOL';
+
+            document.getElementById('equityUsed').textContent = formatCurrency(equity);
+            document.getElementById('debtUsed').textContent = formatCurrency(optimalDebt);
+            document.getElementById('effectiveCostDebt').textContent = formatPercent(effectiveCostDebtOptimal);
+            document.getElementById('leverageMultiple').textContent = (totalCapital / equity).toFixed(2) + 'x';
+
+            document.getElementById('expectedROE').textContent = formatPercent(leveragedReturn);
+            document.getElementById('interestCoverage').textContent = interestCoverage.toFixed(1) + 'x';
+            document.getElementById('valueAtTarget').textContent = formatCurrency(valueAtTarget);
+            document.getElementById('equityReturn').textContent = formatPercent(equityReturnAtTarget);
+
+            updateWACCChart(debtLevels, waccCurve, optimalDE);
+            updateTradeoffChart(debtLevels, taxShields, distressCosts);
+        }
+
+        function updateWACCChart(debtLevels, waccCurve, optimalDE) {
+            if (waccChart) waccChart.destroy();
+
+            const ctx = document.getElementById('waccChart').getContext('2d');
+            waccChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: debtLevels.map(d => d.toFixed(1)),
+                    datasets: [{
+                        label: 'WACC (%)',
+                        data: waccCurve,
+                        borderColor: solanaColors.purple,
+                        backgroundColor: 'rgba(153, 69, 255, 0.1)',
+                        fill: true,
+                        borderWidth: 2.5,
+                        tension: 0.3,
+                        pointRadius: debtLevels.map((d, i) => Math.abs(d - optimalDE) < 0.1 ? 8 : 0),
+                        pointBackgroundColor: solanaColors.green
+                    }]
+                },
+                options: {
+                    ...chartDefaults,
+                    scales: {
+                        x: { ...chartDefaults.scales.x, title: { display: true, text: 'Debt/Equity Ratio', color: '#8B949E' } },
+                        y: { ...chartDefaults.scales.y, title: { display: true, text: 'WACC (%)', color: '#8B949E' } }
+                    },
+                    plugins: {
+                        ...chartDefaults.plugins,
+                        annotation: {
+                            annotations: {
+                                optimalLine: {
+                                    type: 'line',
+                                    xMin: optimalDE,
+                                    xMax: optimalDE,
+                                    borderColor: solanaColors.green,
+                                    borderWidth: 2,
+                                    borderDash: [5, 5],
+                                    label: {
+                                        display: true,
+                                        content: 'Optimal',
+                                        position: 'start'
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateTradeoffChart(debtLevels, taxShields, distressCosts) {
+            // Net benefit = tax shield - distress cost
+            const netBenefit = taxShields.map((ts, i) => ts - distressCosts[i]);
+
+            if (tradeoffChart) tradeoffChart.destroy();
+
+            const ctx = document.getElementById('tradeoffChart').getContext('2d');
+            tradeoffChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: debtLevels.map(d => d.toFixed(1)),
+                    datasets: [
+                        {
+                            label: 'Tax Shield ($M)',
+                            data: taxShields,
+                            borderColor: solanaColors.green,
+                            backgroundColor: 'transparent',
+                            borderWidth: 2
+                        },
+                        {
+                            label: 'Distress Cost ($M)',
+                            data: distressCosts,
+                            borderColor: solanaColors.red,
+                            backgroundColor: 'transparent',
+                            borderWidth: 2
+                        },
+                        {
+                            label: 'Net Benefit ($M)',
+                            data: netBenefit,
+                            borderColor: solanaColors.purple,
+                            backgroundColor: 'rgba(153, 69, 255, 0.2)',
+                            fill: true,
+                            borderWidth: 2.5
+                        }
+                    ]
+                },
+                options: {
+                    ...chartDefaults,
+                    scales: {
+                        x: { ...chartDefaults.scales.x, title: { display: true, text: 'Debt/Equity Ratio', color: '#8B949E' } },
+                        y: { ...chartDefaults.scales.y, title: { display: true, text: 'Value ($M)', color: '#8B949E' } }
+                    }
+                }
+            });
+        }
+
+        function setupSliders() {
+            const sliders = [
+                { id: 'equity', displayId: 'equityDisplay', format: v => '$' + v + 'M' },
+                { id: 'maxDebt', displayId: 'maxDebtDisplay', format: v => '$' + v + 'M' },
+                { id: 'costEquity', displayId: 'costEquityDisplay', format: v => v + '%' },
+                { id: 'costDebt', displayId: 'costDebtDisplay', format: v => v + '%' },
+                { id: 'taxRate', displayId: 'taxRateDisplay', format: v => v + '%' },
+                { id: 'currentPrice', displayId: 'currentPriceDisplay', format: v => '$' + v },
+                { id: 'targetPrice', displayId: 'targetPriceDisplay', format: v => '$' + v },
+                { id: 'stakingYield', displayId: 'stakingYieldDisplay', format: v => v + '%' }
+            ];
+
+            sliders.forEach(({ id, displayId, format }) => {
+                const slider = document.getElementById(id);
+                slider.addEventListener('input', () => {
+                    document.getElementById(displayId).textContent = format(parseFloat(slider.value));
+                    calculate();
+                });
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setupSliders();
+            calculate();
+        });
+    </script>
+</body>
+</html>

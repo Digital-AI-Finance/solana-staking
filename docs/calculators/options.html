@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Options Strategy Builder | SOL Staking</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <nav>
+        <div class="nav-content">
+            <a href="../index.html" class="logo">SOL Staking</a>
+            <div class="nav-links">
+                <a href="../index.html">Home</a>
+                <a href="validator.html">Validator</a>
+                <a href="convertible.html">Convertible</a>
+                <a href="options.html">Options</a>
+                <a href="monte-carlo.html">Monte Carlo</a>
+                <a href="capital-structure.html">Capital Structure</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="calculator-header">
+            <h1>Options Strategy Builder</h1>
+            <a href="../index.html" class="btn btn-secondary">Back to Home</a>
+        </div>
+
+        <div class="two-column">
+            <div class="input-section">
+                <h2>Position Parameters</h2>
+
+                <div class="form-group">
+                    <label>SOL Holdings</label>
+                    <div class="slider-container">
+                        <input type="range" id="solHoldings" min="100" max="10000" value="1000" step="100">
+                        <span class="slider-value" id="solHoldingsDisplay">1,000 SOL</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Current SOL Price ($)</label>
+                    <div class="slider-container">
+                        <input type="range" id="currentPrice" min="50" max="300" value="150" step="5">
+                        <span class="slider-value" id="currentPriceDisplay">$150</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Strategy</label>
+                    <select id="strategy">
+                        <option value="covered_call">Covered Call</option>
+                        <option value="cash_put">Cash-Secured Put</option>
+                        <option value="collar">Protective Collar</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Strike Price ($)</label>
+                    <div class="slider-container">
+                        <input type="range" id="strikePrice" min="100" max="300" value="180" step="5">
+                        <span class="slider-value" id="strikePriceDisplay">$180</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Time to Expiration (Days)</label>
+                    <div class="slider-container">
+                        <input type="range" id="daysToExpiry" min="7" max="90" value="30" step="1">
+                        <span class="slider-value" id="daysToExpiryDisplay">30 days</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Implied Volatility (%)</label>
+                    <div class="slider-container">
+                        <input type="range" id="iv" min="40" max="150" value="80" step="5">
+                        <span class="slider-value" id="ivDisplay">80%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="output-section">
+                <h2>Strategy Analysis</h2>
+
+                <div class="results-grid">
+                    <div class="result-item">
+                        <div class="label">Premium</div>
+                        <div class="value" id="premium">-</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="label">Max Profit</div>
+                        <div class="value" id="maxProfit">-</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="label">Max Loss</div>
+                        <div class="value negative" id="maxLoss">-</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="label">Breakeven</div>
+                        <div class="value" id="breakeven">-</div>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 20px;">Position Greeks</h3>
+                <table>
+                    <tr><td>Delta</td><td id="posDelta">-</td></tr>
+                    <tr><td>Gamma</td><td id="posGamma">-</td></tr>
+                    <tr><td>Theta (daily)</td><td id="posTheta">-</td></tr>
+                    <tr><td>Vega</td><td id="posVega">-</td></tr>
+                </table>
+
+                <h3 style="margin-top: 20px;">Yield Analysis</h3>
+                <table>
+                    <tr><td>Premium Yield</td><td id="premiumYield">-</td></tr>
+                    <tr><td>Annualized Yield</td><td id="annualizedYield">-</td></tr>
+                    <tr><td>Return if Called</td><td id="returnIfCalled">-</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top: 20px;">
+            <h2>Payoff Diagram</h2>
+            <div class="chart-container" style="height: 350px;">
+                <canvas id="payoffChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>SOL Staking Calculator | <a href="https://github.com/Digital-AI-Finance/solana-staking">GitHub</a></p>
+    </footer>
+
+    <script src="../js/utils.js"></script>
+    <script>
+        let payoffChart = null;
+
+        function calculate() {
+            const holdings = parseFloat(document.getElementById('solHoldings').value);
+            const currentPrice = parseFloat(document.getElementById('currentPrice').value);
+            const strategy = document.getElementById('strategy').value;
+            const strike = parseFloat(document.getElementById('strikePrice').value);
+            const days = parseFloat(document.getElementById('daysToExpiry').value);
+            const iv = parseFloat(document.getElementById('iv').value) / 100;
+
+            const T = days / 365;
+            const r = 0.045;
+
+            // Calculate option premium
+            let premium, maxProfit, maxLoss, breakeven;
+            let posDelta, posGamma, posTheta, posVega;
+
+            if (strategy === 'covered_call') {
+                const callPremium = blackScholesCall(currentPrice, strike, T, r, iv);
+                premium = callPremium * holdings;
+                maxProfit = (strike - currentPrice + callPremium) * holdings;
+                maxLoss = (currentPrice - callPremium) * holdings;
+                breakeven = currentPrice - callPremium;
+
+                posDelta = holdings * (1 - deltaCall(currentPrice, strike, T, r, iv));
+                posGamma = -holdings * gamma(currentPrice, strike, T, r, iv);
+                posTheta = holdings * thetaCall(currentPrice, strike, T, r, iv);
+                posVega = -holdings * vega(currentPrice, strike, T, r, iv);
+            } else if (strategy === 'cash_put') {
+                const putPremium = blackScholesPut(currentPrice, strike, T, r, iv);
+                premium = putPremium * holdings;
+                maxProfit = premium;
+                maxLoss = (strike - putPremium) * holdings;
+                breakeven = strike - putPremium;
+
+                posDelta = holdings * (1 - deltaCall(currentPrice, strike, T, r, iv));
+                posGamma = holdings * gamma(currentPrice, strike, T, r, iv);
+                posTheta = holdings * thetaCall(currentPrice, strike, T, r, iv);
+                posVega = holdings * vega(currentPrice, strike, T, r, iv);
+            } else {
+                const putStrike = currentPrice * 0.85;
+                const callPremium = blackScholesCall(currentPrice, strike, T, r, iv);
+                const putPremium = blackScholesPut(currentPrice, putStrike, T, r, iv);
+                premium = (callPremium - putPremium) * holdings;
+                maxProfit = (strike - currentPrice + callPremium - putPremium) * holdings;
+                maxLoss = (currentPrice - putStrike + callPremium - putPremium) * holdings;
+                breakeven = currentPrice - callPremium + putPremium;
+
+                posDelta = holdings * (1 - deltaCall(currentPrice, strike, T, r, iv) + (1 - deltaCall(currentPrice, putStrike, T, r, iv)));
+                posGamma = 0;
+                posTheta = 0;
+                posVega = 0;
+            }
+
+            // Yield calculations
+            const premiumYield = premium / (currentPrice * holdings);
+            const annualizedYield = premiumYield * (365 / days);
+            const returnIfCalled = (strike - currentPrice) / currentPrice + premiumYield;
+
+            // Update display
+            document.getElementById('premium').textContent = formatCurrency(premium);
+            document.getElementById('maxProfit').textContent = formatCurrency(maxProfit);
+            document.getElementById('maxLoss').textContent = formatCurrency(maxLoss);
+            document.getElementById('breakeven').textContent = '$' + breakeven.toFixed(2);
+
+            document.getElementById('posDelta').textContent = posDelta.toFixed(2);
+            document.getElementById('posGamma').textContent = posGamma.toFixed(4);
+            document.getElementById('posTheta').textContent = '$' + posTheta.toFixed(2);
+            document.getElementById('posVega').textContent = '$' + posVega.toFixed(2);
+
+            document.getElementById('premiumYield').textContent = formatPercent(premiumYield);
+            document.getElementById('annualizedYield').textContent = formatPercent(annualizedYield);
+            document.getElementById('returnIfCalled').textContent = formatPercent(returnIfCalled);
+
+            updateChart(strategy, currentPrice, strike, premium / holdings, holdings);
+        }
+
+        function updateChart(strategy, currentPrice, strike, premiumPerUnit, holdings) {
+            const prices = [];
+            const payoffs = [];
+
+            for (let price = 80; price <= 280; price += 2) {
+                prices.push(price);
+
+                let payoff;
+                if (strategy === 'covered_call') {
+                    payoff = Math.min(strike, price) - currentPrice + premiumPerUnit;
+                } else if (strategy === 'cash_put') {
+                    payoff = premiumPerUnit - Math.max(strike - price, 0);
+                } else {
+                    const putStrike = currentPrice * 0.85;
+                    payoff = price - currentPrice + Math.max(putStrike - price, 0) - Math.max(price - strike, 0);
+                }
+                payoffs.push(payoff * holdings / 1000);
+            }
+
+            if (payoffChart) payoffChart.destroy();
+
+            const ctx = document.getElementById('payoffChart').getContext('2d');
+            payoffChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: prices,
+                    datasets: [{
+                        label: 'P&L ($K)',
+                        data: payoffs,
+                        borderColor: solanaColors.purple,
+                        backgroundColor: 'rgba(153, 69, 255, 0.1)',
+                        fill: true,
+                        borderWidth: 2.5
+                    }]
+                },
+                options: {
+                    ...chartDefaults,
+                    scales: {
+                        x: { ...chartDefaults.scales.x, title: { display: true, text: 'SOL Price at Expiration ($)', color: '#8B949E' } },
+                        y: { ...chartDefaults.scales.y, title: { display: true, text: 'Profit/Loss ($K)', color: '#8B949E' } }
+                    }
+                }
+            });
+        }
+
+        function setupSliders() {
+            const sliders = [
+                { id: 'solHoldings', displayId: 'solHoldingsDisplay', format: v => formatNumber(v) + ' SOL' },
+                { id: 'currentPrice', displayId: 'currentPriceDisplay', format: v => '$' + v },
+                { id: 'strikePrice', displayId: 'strikePriceDisplay', format: v => '$' + v },
+                { id: 'daysToExpiry', displayId: 'daysToExpiryDisplay', format: v => v + ' days' },
+                { id: 'iv', displayId: 'ivDisplay', format: v => v + '%' }
+            ];
+
+            sliders.forEach(({ id, displayId, format }) => {
+                const slider = document.getElementById(id);
+                slider.addEventListener('input', () => {
+                    document.getElementById(displayId).textContent = format(parseFloat(slider.value));
+                    calculate();
+                });
+            });
+
+            document.getElementById('strategy').addEventListener('change', calculate);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setupSliders();
+            calculate();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validator Economics Calculator | SOL Staking</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <nav>
+        <div class="nav-content">
+            <a href="../index.html" class="logo">SOL Staking</a>
+            <div class="nav-links">
+                <a href="../index.html">Home</a>
+                <a href="validator.html">Validator</a>
+                <a href="convertible.html">Convertible</a>
+                <a href="options.html">Options</a>
+                <a href="monte-carlo.html">Monte Carlo</a>
+                <a href="capital-structure.html">Capital Structure</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="calculator-header">
+            <h1>Validator Economics Calculator</h1>
+            <a href="../index.html" class="btn btn-secondary">Back to Home</a>
+        </div>
+
+        <div class="two-column">
+            <!-- Input Section -->
+            <div class="input-section">
+                <h2>Parameters</h2>
+
+                <div class="form-group">
+                    <label>Total Stake (SOL)</label>
+                    <div class="slider-container">
+                        <input type="range" id="totalStake" min="10000" max="5000000" value="500000" step="10000">
+                        <span class="slider-value" id="totalStakeValue">500,000</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Self Stake (SOL)</label>
+                    <div class="slider-container">
+                        <input type="range" id="selfStake" min="1000" max="500000" value="50000" step="1000">
+                        <span class="slider-value" id="selfStakeValue">50,000</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Commission Rate (%)</label>
+                    <div class="slider-container">
+                        <input type="range" id="commission" min="0" max="10" value="5" step="0.5">
+                        <span class="slider-value" id="commissionValue">5%</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Base APY (%)</label>
+                    <div class="slider-container">
+                        <input type="range" id="baseAPY" min="5" max="12" value="7.5" step="0.1">
+                        <span class="slider-value" id="baseAPYValue">7.5%</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>SOL Price (USD)</label>
+                    <div class="slider-container">
+                        <input type="range" id="solPrice" min="50" max="500" value="150" step="5">
+                        <span class="slider-value" id="solPriceValue">$150</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Monthly Infrastructure Cost (USD)</label>
+                    <div class="slider-container">
+                        <input type="range" id="infraCost" min="200" max="2000" value="700" step="50">
+                        <span class="slider-value" id="infraCostValue">$700</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        Jito MEV Enabled
+                        <span class="info-badge tooltip">?
+                            <span class="tooltip-text">Enable Jito client to receive MEV tips from searchers</span>
+                        </span>
+                    </label>
+                    <div class="toggle-container">
+                        <label class="toggle">
+                            <input type="checkbox" id="jitoEnabled" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <span id="jitoStatusText">Enabled</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Output Section -->
+            <div class="output-section">
+                <h2>Annual Results</h2>
+
+                <div class="results-grid">
+                    <div class="result-item">
+                        <div class="label">Total Revenue</div>
+                        <div class="value" id="totalRevenue">-</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="label">Total Costs</div>
+                        <div class="value warning" id="totalCosts">-</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="label">Net Profit</div>
+                        <div class="value" id="netProfit">-</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="label">ROI</div>
+                        <div class="value" id="roi">-</div>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 20px;">Revenue Breakdown</h3>
+                <table>
+                    <tr>
+                        <td>Self-Stake Rewards</td>
+                        <td id="selfStakeRewards">-</td>
+                    </tr>
+                    <tr>
+                        <td>Commission Revenue</td>
+                        <td id="commissionRevenue">-</td>
+                    </tr>
+                    <tr>
+                        <td>MEV Tips (Jito)</td>
+                        <td id="mevRevenue">-</td>
+                    </tr>
+                </table>
+
+                <h3 style="margin-top: 20px;">Cost Breakdown</h3>
+                <table>
+                    <tr>
+                        <td>Vote Costs (~1.1 SOL/day)</td>
+                        <td id="voteCosts">-</td>
+                    </tr>
+                    <tr>
+                        <td>Infrastructure</td>
+                        <td id="infraCostDisplay">-</td>
+                    </tr>
+                </table>
+
+                <h3 style="margin-top: 20px;">Key Metrics</h3>
+                <table>
+                    <tr>
+                        <td>Breakeven Stake</td>
+                        <td id="breakevenStake">-</td>
+                    </tr>
+                    <tr>
+                        <td>Delegated Stake</td>
+                        <td id="delegatedStake">-</td>
+                    </tr>
+                    <tr>
+                        <td>Monthly Profit</td>
+                        <td id="monthlyProfit">-</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- Chart -->
+        <div class="card" style="margin-top: 20px;">
+            <h2>Revenue vs Costs by Stake Level</h2>
+            <div class="chart-container" style="height: 300px;">
+                <canvas id="revenueChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>SOL Staking Calculator | <a href="https://github.com/Digital-AI-Finance/solana-staking">GitHub</a></p>
+        <p>All calculations run client-side. No data is sent to servers.</p>
+    </footer>
+
+    <script src="../js/utils.js"></script>
+    <script>
+        // Constants
+        const DAILY_VOTE_COST = 1.1; // SOL per day
+        const ANNUAL_VOTE_COST = DAILY_VOTE_COST * 365;
+
+        // Chart instance
+        let revenueChart = null;
+
+        // Calculate validator economics
+        function calculate() {
+            const totalStake = parseFloat(document.getElementById('totalStake').value);
+            const selfStake = parseFloat(document.getElementById('selfStake').value);
+            const commission = parseFloat(document.getElementById('commission').value) / 100;
+            const baseAPY = parseFloat(document.getElementById('baseAPY').value) / 100;
+            const solPrice = parseFloat(document.getElementById('solPrice').value);
+            const monthlyInfra = parseFloat(document.getElementById('infraCost').value);
+            const jitoEnabled = document.getElementById('jitoEnabled').checked;
+
+            const delegatedStake = totalStake - selfStake;
+
+            // Revenue calculations
+            const selfStakeRewards = selfStake * baseAPY;
+            const commissionRevenue = delegatedStake * baseAPY * commission;
+
+            // MEV estimate (simplified model based on stake weight)
+            const stakeWeight = totalStake / 400000000; // vs total staked SOL
+            const mevRevenue = jitoEnabled ? stakeWeight * 500000 * 0.03 : 0; // Rough estimate
+
+            const totalRevenueSOL = selfStakeRewards + commissionRevenue + mevRevenue;
+            const totalRevenueUSD = totalRevenueSOL * solPrice;
+
+            // Cost calculations
+            const voteCostsSOL = ANNUAL_VOTE_COST;
+            const infraCostsSOL = (monthlyInfra * 12) / solPrice;
+            const totalCostsSOL = voteCostsSOL + infraCostsSOL;
+            const totalCostsUSD = totalCostsSOL * solPrice;
+
+            // Profit
+            const netProfitSOL = totalRevenueSOL - totalCostsSOL;
+            const netProfitUSD = netProfitSOL * solPrice;
+
+            // ROI on self-stake
+            const roi = netProfitSOL / selfStake;
+
+            // Breakeven stake
+            const revenuePerSOL = baseAPY * commission;
+            const breakevenStake = revenuePerSOL > 0 ? totalCostsSOL / revenuePerSOL : Infinity;
+
+            // Update display
+            document.getElementById('totalRevenue').textContent = formatCurrency(totalRevenueUSD);
+            document.getElementById('totalRevenue').className = 'value';
+
+            document.getElementById('totalCosts').textContent = formatCurrency(totalCostsUSD);
+
+            document.getElementById('netProfit').textContent = formatCurrency(netProfitUSD);
+            document.getElementById('netProfit').className = 'value ' + (netProfitUSD >= 0 ? '' : 'negative');
+
+            document.getElementById('roi').textContent = formatPercent(roi);
+            document.getElementById('roi').className = 'value ' + (roi >= 0 ? '' : 'negative');
+
+            document.getElementById('selfStakeRewards').textContent = formatCurrency(selfStakeRewards, 'SOL');
+            document.getElementById('commissionRevenue').textContent = formatCurrency(commissionRevenue, 'SOL');
+            document.getElementById('mevRevenue').textContent = formatCurrency(mevRevenue, 'SOL');
+
+            document.getElementById('voteCosts').textContent = formatCurrency(voteCostsSOL, 'SOL');
+            document.getElementById('infraCostDisplay').textContent = formatCurrency(monthlyInfra * 12);
+
+            document.getElementById('breakevenStake').textContent = formatCurrency(breakevenStake, 'SOL');
+            document.getElementById('delegatedStake').textContent = formatCurrency(delegatedStake, 'SOL');
+            document.getElementById('monthlyProfit').textContent = formatCurrency(netProfitUSD / 12);
+
+            // Update chart
+            updateChart(commission, baseAPY, selfStake, monthlyInfra, solPrice, jitoEnabled);
+        }
+
+        // Update chart
+        function updateChart(commission, baseAPY, selfStake, monthlyInfra, solPrice, jitoEnabled) {
+            const stakelevels = [];
+            const revenues = [];
+            const costs = [];
+            const profits = [];
+
+            for (let stake = 50000; stake <= 2000000; stake += 50000) {
+                stakelevels.push(stake / 1000);
+
+                const delegated = stake - selfStake;
+                const revenue = (selfStake * baseAPY + delegated * baseAPY * commission) * solPrice;
+                const cost = (ANNUAL_VOTE_COST + (monthlyInfra * 12) / solPrice) * solPrice;
+
+                revenues.push(revenue / 1000);
+                costs.push(cost / 1000);
+                profits.push((revenue - cost) / 1000);
+            }
+
+            if (revenueChart) {
+                revenueChart.destroy();
+            }
+
+            const ctx = document.getElementById('revenueChart').getContext('2d');
+            revenueChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: stakelevels,
+                    datasets: [
+                        {
+                            label: 'Revenue ($K)',
+                            data: revenues,
+                            borderColor: solanaColors.green,
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            tension: 0.1
+                        },
+                        {
+                            label: 'Costs ($K)',
+                            data: costs,
+                            borderColor: solanaColors.red,
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            borderDash: [5, 5]
+                        },
+                        {
+                            label: 'Profit ($K)',
+                            data: profits,
+                            borderColor: solanaColors.purple,
+                            backgroundColor: 'rgba(153, 69, 255, 0.1)',
+                            fill: true,
+                            borderWidth: 2,
+                            tension: 0.1
+                        }
+                    ]
+                },
+                options: {
+                    ...chartDefaults,
+                    plugins: {
+                        ...chartDefaults.plugins,
+                        title: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        ...chartDefaults.scales,
+                        x: {
+                            ...chartDefaults.scales.x,
+                            title: {
+                                display: true,
+                                text: 'Total Stake (K SOL)',
+                                color: '#8B949E'
+                            }
+                        },
+                        y: {
+                            ...chartDefaults.scales.y,
+                            title: {
+                                display: true,
+                                text: 'Value ($K)',
+                                color: '#8B949E'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Slider value updaters
+        function setupSliders() {
+            const sliders = [
+                { id: 'totalStake', displayId: 'totalStakeValue', format: v => formatNumber(v) },
+                { id: 'selfStake', displayId: 'selfStakeValue', format: v => formatNumber(v) },
+                { id: 'commission', displayId: 'commissionValue', format: v => v + '%' },
+                { id: 'baseAPY', displayId: 'baseAPYValue', format: v => v + '%' },
+                { id: 'solPrice', displayId: 'solPriceValue', format: v => '$' + v },
+                { id: 'infraCost', displayId: 'infraCostValue', format: v => '$' + v }
+            ];
+
+            sliders.forEach(({ id, displayId, format }) => {
+                const slider = document.getElementById(id);
+                const display = document.getElementById(displayId);
+
+                slider.addEventListener('input', () => {
+                    display.textContent = format(parseFloat(slider.value));
+                    calculate();
+                });
+            });
+
+            // Jito toggle
+            document.getElementById('jitoEnabled').addEventListener('change', (e) => {
+                document.getElementById('jitoStatusText').textContent = e.target.checked ? 'Enabled' : 'Disabled';
+                calculate();
+            });
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            setupSliders();
+            calculate();
+        });
+    </script>
+</body>
+</html>

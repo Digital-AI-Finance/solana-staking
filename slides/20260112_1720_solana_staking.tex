@@ -1,0 +1,689 @@
+\documentclass[8pt,aspectratio=169]{beamer}
+\usetheme{Madrid}
+\usecolortheme{default}
+
+% Packages
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{tikz}
+\usepackage{hyperref}
+
+% Colors (Solana-inspired)
+\definecolor{solpurple}{HTML}{9945FF}
+\definecolor{solgreen}{HTML}{14F195}
+\definecolor{darkbg}{HTML}{0D1117}
+\definecolor{accentblue}{HTML}{58A6FF}
+
+\setbeamercolor{title}{fg=solpurple}
+\setbeamercolor{frametitle}{fg=solpurple}
+\setbeamercolor{structure}{fg=solpurple}
+\setbeamercolor{block title}{bg=solpurple,fg=white}
+
+% Custom commands
+\newcommand{\bottomnote}[1]{\vfill\small\textit{#1}}
+\newcommand{\highlight}[1]{\textcolor{solpurple}{\textbf{#1}}}
+
+% Title
+\title{SOL Staking \& Capital Structure Optimization}
+\subtitle{A Framework for Permanent SOL Accumulation}
+\author{Digital Finance Research}
+\institute{github.com/Digital-AI-Finance/solana-staking}
+\date{January 2026}
+
+\begin{document}
+
+% Title slide
+\begin{frame}
+\titlepage
+\end{frame}
+
+% Table of Contents
+\begin{frame}{Agenda}
+\tableofcontents
+\end{frame}
+
+%=============================================================================
+\section{Solana Staking Fundamentals}
+%=============================================================================
+
+\begin{frame}[t]{Why Solana for Treasury Strategy?}
+\textbf{Key Advantages}
+\begin{itemize}
+    \item Native staking yield: \highlight{7-9\% APY} without smart contract risk
+    \item High throughput: 65,000+ TPS enables real economic activity
+    \item Growing DeFi ecosystem: \$10B+ TVL in liquid staking
+    \item Institutional adoption accelerating (ETF products emerging)
+\end{itemize}
+\vspace{0.3cm}
+\textbf{Staking Economics}
+\begin{itemize}
+    \item Current staking ratio: \highlight{68.57\%} of supply staked
+    \item Inflation-funded rewards distributed to stakers
+    \item MEV revenue adds additional yield via Jito
+\end{itemize}
+\bottomnote{Source: Solana Beach, January 2026}
+\end{frame}
+
+\begin{frame}[t]{Solana Inflation Schedule}
+\begin{center}
+\includegraphics[width=0.65\textwidth]{../charts/01_staking_yield_history/chart.pdf}
+\end{center}
+\bottomnote{Inflation decreases 15\% annually until reaching 1.5\% terminal rate around 2032.}
+\end{frame}
+
+\begin{frame}[t]{Inflation \& Staking APY Mathematics}
+\textbf{Inflation Rate Over Time}
+\begin{equation}
+    i(t) = \max\left(i_0 \cdot (1-d)^t, i_{\text{terminal}}\right)
+\end{equation}
+Where: $i_0 = 8\%$, $d = 15\%$, $i_{\text{terminal}} = 1.5\%$
+
+\vspace{0.3cm}
+\textbf{Staking APY Approximation}
+\begin{equation}
+    APY_{\text{staking}} \approx \frac{i(t)}{s} \cdot (1 - f_{\text{validator}})
+\end{equation}
+Where: $s$ = staking ratio, $f$ = validator commission
+
+\vspace{0.3cm}
+\textbf{Current Values (2025)}
+\begin{itemize}
+    \item Inflation: $i(4) = 8\% \times 0.85^4 \approx 4.07\%$
+    \item Staking APY: $4.07\% / 0.68 \approx 6.0\%$ base + MEV
+\end{itemize}
+\bottomnote{Real yields vary by validator performance and MEV participation.}
+\end{frame}
+
+\begin{frame}[t]{Liquid Staking Token (LST) Landscape}
+\begin{center}
+\includegraphics[width=0.65\textwidth]{../charts/01b_lst_market_share/chart.pdf}
+\end{center}
+\bottomnote{Jito dominates with 76\% market share due to MEV integration.}
+\end{frame}
+
+\begin{frame}[t]{Native vs Liquid Staking Trade-offs}
+\begin{columns}
+\begin{column}{0.48\textwidth}
+\textbf{Native Staking}
+\begin{itemize}
+    \item Direct delegation to validators
+    \item No smart contract risk
+    \item Withdrawal: 2-3 day unstaking
+    \item Full control over validator selection
+\end{itemize}
+\end{column}
+\begin{column}{0.48\textwidth}
+\textbf{Liquid Staking (LSTs)}
+\begin{itemize}
+    \item Receive tradeable token (JitoSOL, mSOL)
+    \item DeFi composability (lending, LP)
+    \item Instant liquidity (swap vs SOL)
+    \item Smart contract risk exposure
+\end{itemize}
+\end{column}
+\end{columns}
+\vspace{0.3cm}
+\textbf{Recommendation}: Institutional treasuries should use \highlight{native staking} for core holdings, LSTs for DeFi yield enhancement on margins.
+\bottomnote{LST smart contract audits are critical for risk assessment.}
+\end{frame}
+
+%=============================================================================
+\section{Validator Business Model}
+%=============================================================================
+
+\begin{frame}[t]{Validator Economics Overview}
+\textbf{Revenue Sources}
+\begin{itemize}
+    \item \highlight{Self-stake rewards}: Full APY on validator's own stake
+    \item \highlight{Commission}: Percentage of delegator rewards (typically 5-10\%)
+    \item \highlight{MEV tips}: Additional revenue via Jito bundle auctions
+\end{itemize}
+\vspace{0.3cm}
+\textbf{Cost Structure}
+\begin{itemize}
+    \item Vote costs: $\sim$1.1 SOL/day ($\sim$400 SOL/year)
+    \item Infrastructure: \$700-1,000/month (hardware, colo, bandwidth)
+    \item Initial setup: \$8,000-15,000 one-time
+\end{itemize}
+\bottomnote{Profitable validators typically need 100K+ SOL in total stake.}
+\end{frame}
+
+\begin{frame}[t]{Validator Cost Structure}
+\begin{center}
+\includegraphics[width=0.65\textwidth]{../charts/02_validator_setup_costs/chart.pdf}
+\end{center}
+\bottomnote{Monthly operating costs total $\sim$\$1,100 plus 33 SOL vote costs.}
+\end{frame}
+
+\begin{frame}[t]{Validator Revenue Model}
+\textbf{Annual Revenue Calculation}
+\begin{equation}
+    R = S_{\text{self}} \cdot APY + S_{\text{delegated}} \cdot APY \cdot c + MEV
+\end{equation}
+Where:
+\begin{itemize}
+    \item $S_{\text{self}}$: Self-stake (validator's own SOL)
+    \item $S_{\text{delegated}}$: Delegated stake from others
+    \item $c$: Commission rate (e.g., 5\%)
+    \item $MEV$: Maximal Extractable Value tips (Jito)
+\end{itemize}
+\vspace{0.3cm}
+\textbf{Example}: 500K total stake, 50K self-stake, 5\% commission, 7.5\% APY
+\begin{align}
+    R &= 50,000 \times 0.075 + 450,000 \times 0.075 \times 0.05 + MEV \\
+    &= 3,750 + 1,687.5 + \sim 500 = \highlight{5,937.5 \text{ SOL/year}}
+\end{align}
+\bottomnote{At \$150/SOL, this equals $\sim$\$890K annual revenue.}
+\end{frame}
+
+\begin{frame}[t]{MEV Revenue Distribution}
+\begin{center}
+\includegraphics[width=0.65\textwidth]{../charts/03_mev_revenue/chart.pdf}
+\end{center}
+\bottomnote{MEV scales with stake weight; Jito-enabled validators earn additional tips.}
+\end{frame}
+
+\begin{frame}[t]{Breakeven Analysis}
+\begin{center}
+\includegraphics[width=0.65\textwidth]{../charts/02d_breakeven_stake/chart.pdf}
+\end{center}
+\bottomnote{Higher commission rates lower breakeven stake but may reduce delegations.}
+\end{frame}
+
+\begin{frame}[t]{Optimal Commission Rate}
+\textbf{The Commission Trade-off}
+\begin{itemize}
+    \item Higher commission $\rightarrow$ More revenue per delegator
+    \item Higher commission $\rightarrow$ Fewer delegators attracted
+\end{itemize}
+\vspace{0.3cm}
+\textbf{Optimization Problem}
+\begin{equation}
+    \max_{c} \Pi(c) = D(c) \cdot APY \cdot c + S_{\text{self}} \cdot APY - \text{Costs}
+\end{equation}
+Where $D(c)$ is delegation demand as a function of commission rate.
+
+\vspace{0.3cm}
+\textbf{Market Observation}
+\begin{itemize}
+    \item Most competitive validators: 0-2\% commission
+    \item Mid-tier validators: 5-8\% commission
+    \item Superminority threshold affects delegation flows
+\end{itemize}
+\bottomnote{Commission optimization depends on validator reputation and performance.}
+\end{frame}
+
+%=============================================================================
+\section{Corporate Finance for SOL Accumulation}
+%=============================================================================
+
+\begin{frame}[t]{The MicroStrategy Playbook}
+\textbf{MicroStrategy's Bitcoin Treasury Strategy}
+\begin{itemize}
+    \item Began August 2020 with \$250M BTC purchase
+    \item Issued \$3B+ in convertible bonds (0\% coupon, 35\% premium)
+    \item Holdings: 660,624 BTC (\$62B as of Dec 2025)
+    \item Stock appreciation: 1,204\% since first purchase
+\end{itemize}
+\vspace{0.3cm}
+\textbf{Adapting for SOL}
+\begin{itemize}
+    \item Same capital structure approach: convertibles + equity
+    \item \highlight{Added benefit}: Native staking yield (BTC has none)
+    \item \highlight{Added benefit}: Validator business as revenue source
+    \item Risk consideration: Higher volatility than BTC
+\end{itemize}
+\bottomnote{Source: Strategy Inc. investor presentations, SEC filings.}
+\end{frame}
+
+\begin{frame}[t]{Convertible Bond Structure}
+\textbf{Zero-Coupon Convertible Mechanics}
+\begin{itemize}
+    \item Face value: \$1,000 per bond
+    \item Coupon: 0\% (no periodic interest)
+    \item Conversion price: Set at premium to current price (e.g., 35\%)
+    \item Maturity: 5 years typical
+\end{itemize}
+\vspace{0.3cm}
+\textbf{Value Decomposition}
+\begin{equation}
+    V_{\text{CB}} = V_{\text{bond}} + V_{\text{call}}
+\end{equation}
+\begin{itemize}
+    \item Bond floor: PV of face value at risk-adjusted rate
+    \item Embedded call: Black-Scholes option on underlying SOL
+\end{itemize}
+\bottomnote{Convertibles allow cheap capital (0\% interest) in exchange for upside participation.}
+\end{frame}
+
+\begin{frame}[t]{Convertible Payoff Diagram}
+\begin{center}
+\includegraphics[width=0.65\textwidth]{../charts/04_convertible_payoff/chart.pdf}
+\end{center}
+\bottomnote{At maturity, holder receives max(face value, conversion value).}
+\end{frame}
+
+\begin{frame}[t]{Black-Scholes Valuation}
+\textbf{Embedded Call Option Pricing}
+\begin{equation}
+    C = S_0 N(d_1) - K e^{-rT} N(d_2)
+\end{equation}
+\begin{equation}
+    d_1 = \frac{\ln(S_0/K) + (r + \sigma^2/2)T}{\sigma\sqrt{T}}, \quad d_2 = d_1 - \sigma\sqrt{T}
+\end{equation}
+
+\textbf{Example}: SOL = \$150, Strike = \$200, T = 5yr, $\sigma$ = 80\%, r = 4.5\%
+\begin{itemize}
+    \item $d_1 = \frac{\ln(150/200) + (0.045 + 0.32)5}{0.8\sqrt{5}} = 0.69$
+    \item Call value per SOL: \$85.23
+    \item Conversion ratio: 5 SOL per \$1,000 bond
+    \item Option value per bond: \$426
+\end{itemize}
+\bottomnote{High SOL volatility makes convertibles attractive to arbitrage funds.}
+\end{frame}
+
+\begin{frame}[t]{PIPE Structure}
+\textbf{Private Investment in Public Equity}
+\begin{itemize}
+    \item Private placement to institutional investors
+    \item Typically 5-15\% discount to market price
+    \item Registration rights for resale
+    \item Lock-up periods (90-180 days)
+    \item Often includes warrant sweeteners
+\end{itemize}
+\vspace{0.3cm}
+\textbf{Advantages for SOL Treasury}
+\begin{itemize}
+    \item Faster execution than public offering
+    \item Lower regulatory burden
+    \item Targeted investor base (crypto-friendly institutions)
+    \item Flexible terms negotiation
+\end{itemize}
+\bottomnote{PIPEs complement convertibles for capital raising flexibility.}
+\end{frame}
+
+%=============================================================================
+\section{Capital Structure Optimization}
+%=============================================================================
+
+\begin{frame}[t]{Modigliani-Miller Framework}
+\textbf{Value of Levered Firm}
+\begin{equation}
+    V_L = V_U + \text{PV(Tax Shield)} - \text{PV(Distress Costs)}
+\end{equation}
+
+\textbf{Trade-off Theory}
+\begin{itemize}
+    \item Tax shield: Interest payments are tax-deductible
+    \item Distress costs: Bankruptcy risk increases with leverage
+    \item Optimal leverage: Where marginal benefit = marginal cost
+\end{itemize}
+\vspace{0.3cm}
+\textbf{Crypto Modification}
+\begin{itemize}
+    \item Higher volatility $\rightarrow$ Higher distress probability
+    \item Staking yield $\rightarrow$ Additional interest coverage
+    \item No dividends $\rightarrow$ Tax shield more valuable
+\end{itemize}
+\bottomnote{Traditional MM assumptions need adjustment for crypto treasury.}
+\end{frame}
+
+\begin{frame}[t]{Capital Structure Optimization}
+\begin{center}
+\includegraphics[width=0.65\textwidth]{../charts/06_capital_structure_frontier/chart.pdf}
+\end{center}
+\bottomnote{Optimal D/E ratio minimizes WACC while maintaining interest coverage.}
+\end{frame}
+
+\begin{frame}[t]{WACC Calculation}
+\textbf{Weighted Average Cost of Capital}
+\begin{equation}
+    WACC = \frac{E}{V} \cdot r_e + \frac{D}{V} \cdot r_d \cdot (1-\tau)
+\end{equation}
+
+\textbf{Cost of Equity (MM Proposition II)}
+\begin{equation}
+    r_e = r_u + (r_u - r_d) \cdot \frac{D}{E} \cdot (1-\tau)
+\end{equation}
+
+\textbf{Example}: \$50M equity, 1.5x D/E, $r_u=20\%$, $r_d=6\%$, $\tau=21\%$
+\begin{itemize}
+    \item $r_e = 20\% + (20\%-6\%) \times 1.5 \times 0.79 = 36.6\%$
+    \item $WACC = 0.4 \times 36.6\% + 0.6 \times 6\% \times 0.79 = 17.5\%$
+\end{itemize}
+\bottomnote{SOL staking yield (7.5\%) provides natural interest coverage.}
+\end{frame}
+
+\begin{frame}[t]{Interest Coverage Analysis}
+\textbf{Interest Coverage Ratio}
+\begin{equation}
+    ICR = \frac{\text{Staking Income} + \text{MEV Revenue}}{\text{Interest Expense}}
+\end{equation}
+
+\textbf{Example Calculation}
+\begin{itemize}
+    \item Debt: \$75M at 6\% = \$4.5M annual interest
+    \item SOL holdings: 833K SOL (at \$150)
+    \item Staking income: 833K $\times$ 7.5\% $\times$ \$150 = \$9.37M
+    \item ICR = \$9.37M / \$4.5M = \highlight{2.08x}
+\end{itemize}
+\vspace{0.3cm}
+\textbf{Minimum Threshold}: ICR $>$ 1.5x recommended for stability
+\bottomnote{Staking yield provides natural debt service coverage unique to SOL.}
+\end{frame}
+
+%=============================================================================
+\section{Options Strategies for Yield Enhancement}
+%=============================================================================
+
+\begin{frame}[t]{Options Overlay Strategy}
+\textbf{Enhancing Returns with Derivatives}
+\begin{itemize}
+    \item \highlight{Covered Calls}: Sell upside for premium income
+    \item \highlight{Cash-Secured Puts}: Accumulate SOL at lower prices
+    \item \highlight{Collars}: Downside protection with premium offset
+    \item \highlight{Volatility Harvesting}: Exploit IV vs RV spread
+\end{itemize}
+\vspace{0.3cm}
+\textbf{SOL Options Market}
+\begin{itemize}
+    \item Primary venues: Deribit, OKX
+    \item Typical IV: 70-100\% annualized
+    \item Liquidity: Concentrated in monthly expirations
+    \item Strike availability: Limited compared to BTC/ETH
+\end{itemize}
+\bottomnote{Options overlay can add 5-15\% annual yield in high-vol environments.}
+\end{frame}
+
+\begin{frame}[t]{Covered Call Strategy}
+\begin{center}
+\includegraphics[width=0.65\textwidth]{../charts/08a_covered_call_payoff/chart.pdf}
+\end{center}
+\bottomnote{Trade unlimited upside for immediate premium income.}
+\end{frame}
+
+\begin{frame}[t]{Covered Call Mathematics}
+\textbf{Position Composition}
+\begin{itemize}
+    \item Long: 1 SOL at \$150
+    \item Short: 1 Call, Strike \$180, Premium \$15
+\end{itemize}
+
+\textbf{Payoff at Expiration}
+\begin{equation}
+    \Pi = \min(K, S_T) - S_0 + C
+\end{equation}
+
+\textbf{Key Metrics}
+\begin{itemize}
+    \item Maximum profit: $(K - S_0) + C = \$30 + \$15 = \$45$ (30\%)
+    \item Breakeven: $S_0 - C = \$150 - \$15 = \$135$
+    \item Premium yield: $C/S_0 = 15/150 = 10\%$ per period
+\end{itemize}
+\bottomnote{Repeat monthly for 20-40\% annualized premium income in high-vol periods.}
+\end{frame}
+
+\begin{frame}[t]{Cash-Secured Put for Accumulation}
+\textbf{Strategy Logic}
+\begin{itemize}
+    \item Sell put at desired entry price (e.g., \$120)
+    \item Receive premium immediately
+    \item If assigned: Buy SOL at target price (win)
+    \item If not assigned: Keep premium (win)
+\end{itemize}
+\vspace{0.3cm}
+\textbf{Example}
+\begin{itemize}
+    \item Sell Put: Strike \$120, Premium \$8
+    \item If SOL drops to \$100: Buy at \$120, effective cost \$112
+    \item If SOL stays above \$120: Keep \$8 premium (6.7\% yield)
+\end{itemize}
+\bottomnote{Systematic put selling accumulates SOL at progressively lower prices.}
+\end{frame}
+
+%=============================================================================
+\section{Monte Carlo Simulations}
+%=============================================================================
+
+\begin{frame}[t]{Price Path Modeling}
+\textbf{Geometric Brownian Motion with Jumps (Merton)}
+\begin{equation}
+    dS_t = (\mu - \lambda\kappa)S_t dt + \sigma S_t dW_t + S_t dJ_t
+\end{equation}
+
+\textbf{Parameters for SOL}
+\begin{itemize}
+    \item $\mu = 15\%$: Expected annual return (includes staking)
+    \item $\sigma = 80\%$: Annualized volatility
+    \item $\lambda = 2$: Jump intensity (2 events/year avg)
+    \item $\mu_J = -15\%$: Mean jump size (crashes)
+    \item $\sigma_J = 10\%$: Jump size volatility
+\end{itemize}
+\bottomnote{Jump component captures crypto market crash dynamics.}
+\end{frame}
+
+\begin{frame}[t]{Monte Carlo Fan Chart}
+\begin{center}
+\includegraphics[width=0.65\textwidth]{../charts/07_monte_carlo_fan/chart.pdf}
+\end{center}
+\bottomnote{5,000 simulated paths over 3-year horizon show distribution of outcomes.}
+\end{frame}
+
+\begin{frame}[t]{Accumulation Strategy Comparison}
+\begin{center}
+\includegraphics[width=0.65\textwidth]{../charts/09_dca_vs_lumpsum/chart.pdf}
+\end{center}
+\bottomnote{Lump sum has higher expected value but DCA reduces timing risk.}
+\end{frame}
+
+\begin{frame}[t]{Risk Metrics}
+\textbf{Value at Risk (VaR)}
+\begin{equation}
+    VaR_\alpha = -\mu T + \sigma\sqrt{T} \cdot \Phi^{-1}(\alpha)
+\end{equation}
+
+\textbf{Conditional VaR (Expected Shortfall)}
+\begin{equation}
+    CVaR_\alpha = -\mu T + \sigma\sqrt{T} \cdot \frac{\phi(\Phi^{-1}(\alpha))}{1-\alpha}
+\end{equation}
+
+\textbf{Example}: \$100K portfolio, 3-year horizon, 95\% confidence
+\begin{itemize}
+    \item VaR (95\%): 35\% loss = \$35K maximum expected loss
+    \item CVaR (95\%): 48\% loss = \$48K expected loss if VaR breached
+    \item Note: Staking compounds during drawdowns, reducing realized losses
+\end{itemize}
+\bottomnote{Staking yield provides 25\% additional SOL over 3 years, offsetting losses.}
+\end{frame}
+
+%=============================================================================
+\section{Opportunistic Acquisition Framework}
+%=============================================================================
+
+\begin{frame}[t]{When to Deploy Capital}
+\textbf{Technical Signals}
+\begin{itemize}
+    \item RSI below 30: Oversold condition
+    \item Price below 200-day MA: Long-term support
+    \item Volume spike with price decline: Capitulation
+\end{itemize}
+\vspace{0.3cm}
+\textbf{Fundamental Metrics}
+\begin{itemize}
+    \item Staking ratio increasing: Supply squeeze
+    \item TVL growth in DeFi: Ecosystem health
+    \item Developer activity: GitHub commits, new projects
+\end{itemize}
+\vspace{0.3cm}
+\textbf{Macro Factors}
+\begin{itemize}
+    \item Fed policy: Risk-on during dovish periods
+    \item BTC correlation: SOL typically follows BTC cycles
+    \item Regulatory news: SEC clarity as catalyst
+\end{itemize}
+\bottomnote{Combine technical, fundamental, and macro signals for entry timing.}
+\end{frame}
+
+\begin{frame}[t]{DCA vs Opportunistic Buying}
+\textbf{Dollar Cost Averaging (DCA)}
+\begin{itemize}
+    \item Fixed schedule: \$X every month
+    \item Removes timing decisions
+    \item Works well in sideways/volatile markets
+\end{itemize}
+
+\textbf{Value Averaging (VA)}
+\begin{itemize}
+    \item Target portfolio growth rate
+    \item Buy more when down, less when up
+    \item Requires cash reserves for large buys
+\end{itemize}
+
+\textbf{Opportunistic (Signal-Based)}
+\begin{itemize}
+    \item Deploy capital at triggered signals
+    \item Requires discipline and cash reserves
+    \item Higher expected return, higher variance
+\end{itemize}
+\bottomnote{Hybrid approach: DCA base + opportunistic overlay during extreme events.}
+\end{frame}
+
+%=============================================================================
+\section{Hybrid Model: Validator + Corporate Finance}
+%=============================================================================
+
+\begin{frame}[t]{Integrated Strategy}
+\begin{center}
+\includegraphics[width=0.60\textwidth]{../charts/11_hybrid_model_flow/chart.pdf}
+\end{center}
+\bottomnote{Combine validator operations with corporate capital structure for maximum yield.}
+\end{frame}
+
+\begin{frame}[t]{Revenue Stacking}
+\textbf{Layer 1: Staking Yield}
+\begin{itemize}
+    \item Base APY: 7.5\% on all SOL holdings
+    \item Validator self-stake: Full yield retained
+\end{itemize}
+
+\textbf{Layer 2: Validator Commission}
+\begin{itemize}
+    \item 5\% commission on delegated stake
+    \item Additional 0.5-1\% effective yield
+\end{itemize}
+
+\textbf{Layer 3: MEV Revenue}
+\begin{itemize}
+    \item Jito tips: 0.2-0.5\% additional yield
+    \item Scales with stake weight
+\end{itemize}
+
+\textbf{Layer 4: Options Overlay}
+\begin{itemize}
+    \item Covered calls: 5-15\% additional
+    \item Risk: Caps upside in rallies
+\end{itemize}
+\bottomnote{Combined yield potential: 15-25\% annual before price appreciation.}
+\end{frame}
+
+\begin{frame}[t]{IRR Sensitivity Analysis}
+\begin{center}
+\includegraphics[width=0.65\textwidth]{../charts/12_irr_sensitivity/chart.pdf}
+\end{center}
+\bottomnote{Leverage amplifies returns in both directions; maintain interest coverage.}
+\end{frame}
+
+\begin{frame}[t]{Implementation Roadmap}
+\textbf{Phase 1: Foundation (Months 1-3)}
+\begin{itemize}
+    \item Establish legal entity structure
+    \item Initial equity raise
+    \item Begin SOL accumulation via DCA
+\end{itemize}
+
+\textbf{Phase 2: Validator Setup (Months 4-6)}
+\begin{itemize}
+    \item Deploy validator infrastructure
+    \item Stake initial SOL holdings
+    \item Enable Jito MEV participation
+\end{itemize}
+
+\textbf{Phase 3: Capital Structure (Months 7-12)}
+\begin{itemize}
+    \item Issue convertible bonds (if public)
+    \item Execute PIPE placements
+    \item Begin options overlay strategy
+\end{itemize}
+\bottomnote{Conservative ramp-up allows operational learning and risk management.}
+\end{frame}
+
+%=============================================================================
+\section{Conclusion \& Interactive Tools}
+%=============================================================================
+
+\begin{frame}[t]{Key Takeaways}
+\begin{enumerate}
+    \item \textbf{SOL offers unique yield}: 7-9\% staking APY unavailable with BTC
+    \item \textbf{Validator business adds margin}: Commission + MEV revenue
+    \item \textbf{Corporate finance amplifies}: Convertibles provide cheap capital
+    \item \textbf{Capital structure matters}: Optimize leverage for WACC minimization
+    \item \textbf{Options enhance yield}: 5-15\% additional via covered calls
+    \item \textbf{Risk management critical}: Monte Carlo for scenario planning
+    \item \textbf{Hybrid model maximizes}: Stack multiple yield sources
+\end{enumerate}
+\bottomnote{Target: 15-25\% annual ROE through integrated strategy.}
+\end{frame}
+
+\begin{frame}[t]{Interactive Calculators}
+\textbf{Available at:} \url{https://digital-ai-finance.github.io/solana-staking}
+
+\begin{itemize}
+    \item \textbf{Validator Economics}: Profitability by stake and commission
+    \item \textbf{Convertible Analyzer}: Bond valuation and Greeks
+    \item \textbf{Options Strategy Builder}: Payoff diagrams and premium
+    \item \textbf{Monte Carlo Simulator}: Distribution of outcomes
+    \item \textbf{Capital Structure Optimizer}: WACC and leverage analysis
+\end{itemize}
+\vspace{0.5cm}
+\begin{center}
+\textit{All tools run client-side -- no data sent to servers}
+\end{center}
+\bottomnote{Source code available on GitHub for transparency and audit.}
+\end{frame}
+
+\begin{frame}[t]{Mathematical Appendix}
+\textbf{Full derivations available in whitepaper:}
+\begin{itemize}
+    \item Merton jump-diffusion derivation
+    \item Black-Scholes from first principles
+    \item MM capital structure optimization
+    \item VaR and CVaR proofs
+    \item Validator economics model
+    \item Options strategy payoff derivations
+\end{itemize}
+\vspace{0.5cm}
+\textbf{GitHub Repository}
+\begin{itemize}
+    \item Python models: \texttt{models/*.py}
+    \item Chart generation: \texttt{charts/*/chart.py}
+    \item JavaScript calculators: \texttt{docs/calculators/}
+\end{itemize}
+\bottomnote{All code open source under MIT license.}
+\end{frame}
+
+\begin{frame}
+\begin{center}
+\Huge\textcolor{solpurple}{Questions?}
+
+\vspace{1cm}
+\large
+\texttt{github.com/Digital-AI-Finance/solana-staking}
+
+\vspace{0.5cm}
+\normalsize
+Slides, models, and calculators all open source
+\end{center}
+\end{frame}
+
+\end{document}

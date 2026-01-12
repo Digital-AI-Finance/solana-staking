@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convertible Bond Analyzer | SOL Staking</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <nav>
+        <div class="nav-content">
+            <a href="../index.html" class="logo">SOL Staking</a>
+            <div class="nav-links">
+                <a href="../index.html">Home</a>
+                <a href="validator.html">Validator</a>
+                <a href="convertible.html">Convertible</a>
+                <a href="options.html">Options</a>
+                <a href="monte-carlo.html">Monte Carlo</a>
+                <a href="capital-structure.html">Capital Structure</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="calculator-header">
+            <h1>Convertible Bond Analyzer</h1>
+            <a href="../index.html" class="btn btn-secondary">Back to Home</a>
+        </div>
+
+        <div class="two-column">
+            <!-- Input Section -->
+            <div class="input-section">
+                <h2>Bond Parameters</h2>
+
+                <div class="form-group">
+                    <label>Face Value ($M)</label>
+                    <div class="slider-container">
+                        <input type="range" id="faceValue" min="10" max="500" value="100" step="10">
+                        <span class="slider-value" id="faceValueDisplay">$100M</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Conversion Price ($)</label>
+                    <div class="slider-container">
+                        <input type="range" id="conversionPrice" min="100" max="400" value="200" step="5">
+                        <span class="slider-value" id="conversionPriceDisplay">$200</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Current SOL Price ($)</label>
+                    <div class="slider-container">
+                        <input type="range" id="solPrice" min="50" max="300" value="150" step="5">
+                        <span class="slider-value" id="solPriceDisplay">$150</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Maturity (Years)</label>
+                    <div class="slider-container">
+                        <input type="range" id="maturity" min="1" max="10" value="5" step="0.5">
+                        <span class="slider-value" id="maturityDisplay">5 years</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Risk-Free Rate (%)</label>
+                    <div class="slider-container">
+                        <input type="range" id="riskFreeRate" min="1" max="8" value="4.5" step="0.1">
+                        <span class="slider-value" id="riskFreeRateDisplay">4.5%</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>SOL Volatility (%)</label>
+                    <div class="slider-container">
+                        <input type="range" id="volatility" min="30" max="150" value="80" step="5">
+                        <span class="slider-value" id="volatilityDisplay">80%</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Credit Spread (%)</label>
+                    <div class="slider-container">
+                        <input type="range" id="creditSpread" min="1" max="8" value="3" step="0.5">
+                        <span class="slider-value" id="creditSpreadDisplay">3%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Output Section -->
+            <div class="output-section">
+                <h2>Valuation (per $1,000 face)</h2>
+
+                <div class="results-grid">
+                    <div class="result-item">
+                        <div class="label">Bond Floor</div>
+                        <div class="value" id="bondFloor">-</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="label">Option Value</div>
+                        <div class="value" id="optionValue">-</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="label">CB Value</div>
+                        <div class="value" id="cbValue">-</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="label">Parity</div>
+                        <div class="value" id="parity">-</div>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 20px;">Key Metrics</h3>
+                <table>
+                    <tr>
+                        <td>Conversion Ratio</td>
+                        <td id="conversionRatio">-</td>
+                    </tr>
+                    <tr>
+                        <td>Conversion Premium</td>
+                        <td id="conversionPremium">-</td>
+                    </tr>
+                    <tr>
+                        <td>Investment Premium</td>
+                        <td id="investmentPremium">-</td>
+                    </tr>
+                    <tr>
+                        <td>SOL if Converted</td>
+                        <td id="solIfConverted">-</td>
+                    </tr>
+                </table>
+
+                <h3 style="margin-top: 20px;">Greeks (per $1,000)</h3>
+                <table>
+                    <tr>
+                        <td>Delta</td>
+                        <td id="delta">-</td>
+                    </tr>
+                    <tr>
+                        <td>Gamma</td>
+                        <td id="gamma">-</td>
+                    </tr>
+                    <tr>
+                        <td>Vega</td>
+                        <td id="vega">-</td>
+                    </tr>
+                    <tr>
+                        <td>Theta (per day)</td>
+                        <td id="theta">-</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- Payoff Chart -->
+        <div class="card" style="margin-top: 20px;">
+            <h2>Convertible Payoff Diagram</h2>
+            <div class="chart-container" style="height: 350px;">
+                <canvas id="payoffChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>SOL Staking Calculator | <a href="https://github.com/Digital-AI-Finance/solana-staking">GitHub</a></p>
+        <p>Black-Scholes pricing. All calculations run client-side.</p>
+    </footer>
+
+    <script src="../js/utils.js"></script>
+    <script>
+        let payoffChart = null;
+
+        function calculate() {
+            const faceValue = parseFloat(document.getElementById('faceValue').value) * 1e6;
+            const conversionPrice = parseFloat(document.getElementById('conversionPrice').value);
+            const solPrice = parseFloat(document.getElementById('solPrice').value);
+            const maturity = parseFloat(document.getElementById('maturity').value);
+            const riskFreeRate = parseFloat(document.getElementById('riskFreeRate').value) / 100;
+            const volatility = parseFloat(document.getElementById('volatility').value) / 100;
+            const creditSpread = parseFloat(document.getElementById('creditSpread').value) / 100;
+
+            // Per $1000 face value
+            const conversionRatio = 1000 / conversionPrice;
+
+            // Bond floor (zero-coupon)
+            const discountRate = riskFreeRate + creditSpread;
+            const bondFloor = 1000 * Math.exp(-discountRate * maturity);
+
+            // Parity (conversion value)
+            const parity = conversionRatio * solPrice;
+
+            // Option value using Black-Scholes
+            const callPrice = blackScholesCall(solPrice, conversionPrice, maturity, riskFreeRate, volatility);
+            const optionValuePer1000 = callPrice * conversionRatio;
+
+            // Total CB value
+            const cbValue = bondFloor + optionValuePer1000;
+
+            // Premiums
+            const conversionPremium = (conversionPrice - solPrice) / solPrice;
+            const investmentPremium = (cbValue - bondFloor) / bondFloor;
+
+            // Total SOL if converted
+            const solIfConverted = faceValue / conversionPrice;
+
+            // Greeks
+            const d1 = (Math.log(solPrice / conversionPrice) + (riskFreeRate + 0.5 * volatility * volatility) * maturity) / (volatility * Math.sqrt(maturity));
+            const deltaVal = normalCDF(d1) * conversionRatio;
+            const gammaVal = normalPDF(d1) / (solPrice * volatility * Math.sqrt(maturity)) * conversionRatio;
+            const vegaVal = vega(solPrice, conversionPrice, maturity, riskFreeRate, volatility) * conversionRatio;
+            const thetaVal = thetaCall(solPrice, conversionPrice, maturity, riskFreeRate, volatility) * conversionRatio;
+
+            // Update display
+            document.getElementById('bondFloor').textContent = '$' + bondFloor.toFixed(2);
+            document.getElementById('optionValue').textContent = '$' + optionValuePer1000.toFixed(2);
+            document.getElementById('cbValue').textContent = '$' + cbValue.toFixed(2);
+            document.getElementById('parity').textContent = '$' + parity.toFixed(2);
+
+            document.getElementById('conversionRatio').textContent = conversionRatio.toFixed(4) + ' SOL';
+            document.getElementById('conversionPremium').textContent = formatPercent(conversionPremium);
+            document.getElementById('investmentPremium').textContent = formatPercent(investmentPremium);
+            document.getElementById('solIfConverted').textContent = formatNumber(solIfConverted, 0) + ' SOL';
+
+            document.getElementById('delta').textContent = deltaVal.toFixed(4);
+            document.getElementById('gamma').textContent = gammaVal.toFixed(6);
+            document.getElementById('vega').textContent = '$' + vegaVal.toFixed(2);
+            document.getElementById('theta').textContent = '$' + thetaVal.toFixed(4);
+
+            // Update chart
+            updatePayoffChart(bondFloor, conversionRatio, conversionPrice, solPrice, cbValue);
+        }
+
+        function updatePayoffChart(bondFloor, conversionRatio, conversionPrice, currentPrice, currentCBValue) {
+            const prices = [];
+            const payoffs = [];
+            const parityValues = [];
+            const bondFloorLine = [];
+            const cbValues = [];
+
+            for (let price = 50; price <= 400; price += 5) {
+                prices.push(price);
+                payoffs.push(Math.max(1000, conversionRatio * price));
+                parityValues.push(conversionRatio * price);
+                bondFloorLine.push(bondFloor);
+
+                // Simplified CB value (for illustration)
+                const timeValue = Math.max(0, currentCBValue - Math.max(bondFloor, conversionRatio * currentPrice));
+                const priceRatio = price / currentPrice;
+                cbValues.push(Math.max(bondFloor, conversionRatio * price) + timeValue * Math.min(priceRatio, 1.5));
+            }
+
+            if (payoffChart) {
+                payoffChart.destroy();
+            }
+
+            const ctx = document.getElementById('payoffChart').getContext('2d');
+            payoffChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: prices,
+                    datasets: [
+                        {
+                            label: 'Payoff at Maturity',
+                            data: payoffs,
+                            borderColor: solanaColors.red,
+                            backgroundColor: 'transparent',
+                            borderWidth: 2.5,
+                            tension: 0
+                        },
+                        {
+                            label: 'Conversion Value',
+                            data: parityValues,
+                            borderColor: solanaColors.green,
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            borderDash: [5, 5]
+                        },
+                        {
+                            label: 'Bond Floor',
+                            data: bondFloorLine,
+                            borderColor: solanaColors.orange,
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            borderDash: [5, 5]
+                        },
+                        {
+                            label: 'CB Value (Today)',
+                            data: cbValues,
+                            borderColor: solanaColors.purple,
+                            backgroundColor: 'rgba(153, 69, 255, 0.1)',
+                            fill: true,
+                            borderWidth: 3,
+                            tension: 0.1
+                        }
+                    ]
+                },
+                options: {
+                    ...chartDefaults,
+                    scales: {
+                        ...chartDefaults.scales,
+                        x: {
+                            ...chartDefaults.scales.x,
+                            title: { display: true, text: 'SOL Price ($)', color: '#8B949E' }
+                        },
+                        y: {
+                            ...chartDefaults.scales.y,
+                            title: { display: true, text: 'Value per $1,000 Face ($)', color: '#8B949E' },
+                            min: 500,
+                            max: 2500
+                        }
+                    },
+                    plugins: {
+                        ...chartDefaults.plugins,
+                        annotation: {
+                            annotations: {
+                                currentPrice: {
+                                    type: 'line',
+                                    xMin: currentPrice,
+                                    xMax: currentPrice,
+                                    borderColor: solanaColors.blue,
+                                    borderWidth: 2,
+                                    borderDash: [3, 3]
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Setup sliders
+        function setupSliders() {
+            const sliders = [
+                { id: 'faceValue', displayId: 'faceValueDisplay', format: v => '$' + v + 'M' },
+                { id: 'conversionPrice', displayId: 'conversionPriceDisplay', format: v => '$' + v },
+                { id: 'solPrice', displayId: 'solPriceDisplay', format: v => '$' + v },
+                { id: 'maturity', displayId: 'maturityDisplay', format: v => v + ' years' },
+                { id: 'riskFreeRate', displayId: 'riskFreeRateDisplay', format: v => v + '%' },
+                { id: 'volatility', displayId: 'volatilityDisplay', format: v => v + '%' },
+                { id: 'creditSpread', displayId: 'creditSpreadDisplay', format: v => v + '%' }
+            ];
+
+            sliders.forEach(({ id, displayId, format }) => {
+                const slider = document.getElementById(id);
+                const display = document.getElementById(displayId);
+
+                slider.addEventListener('input', () => {
+                    display.textContent = format(parseFloat(slider.value));
+                    calculate();
+                });
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setupSliders();
+            calculate();
+        });
+    </script>
+</body>
+</html>

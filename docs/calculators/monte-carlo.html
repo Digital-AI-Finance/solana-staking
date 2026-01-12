@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monte Carlo Simulator | SOL Staking</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <nav>
+        <div class="nav-content">
+            <a href="../index.html" class="logo">SOL Staking</a>
+            <div class="nav-links">
+                <a href="../index.html">Home</a>
+                <a href="validator.html">Validator</a>
+                <a href="convertible.html">Convertible</a>
+                <a href="options.html">Options</a>
+                <a href="monte-carlo.html">Monte Carlo</a>
+                <a href="capital-structure.html">Capital Structure</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="calculator-header">
+            <h1>Monte Carlo Simulator</h1>
+            <a href="../index.html" class="btn btn-secondary">Back to Home</a>
+        </div>
+
+        <div class="two-column">
+            <div class="input-section">
+                <h2>Simulation Parameters</h2>
+
+                <div class="form-group">
+                    <label>Initial Capital ($)</label>
+                    <div class="slider-container">
+                        <input type="range" id="initialCapital" min="10000" max="1000000" value="100000" step="10000">
+                        <span class="slider-value" id="initialCapitalDisplay">$100,000</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Strategy</label>
+                    <select id="strategy">
+                        <option value="lump_sum">Lump Sum</option>
+                        <option value="dca" selected>Dollar Cost Averaging (DCA)</option>
+                        <option value="value_avg">Value Averaging</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Time Horizon (Years)</label>
+                    <div class="slider-container">
+                        <input type="range" id="timeHorizon" min="1" max="10" value="3" step="1">
+                        <span class="slider-value" id="timeHorizonDisplay">3 years</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Expected Annual Return (%)</label>
+                    <div class="slider-container">
+                        <input type="range" id="expectedReturn" min="-10" max="50" value="15" step="5">
+                        <span class="slider-value" id="expectedReturnDisplay">15%</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Volatility (%)</label>
+                    <div class="slider-container">
+                        <input type="range" id="volatility" min="30" max="150" value="80" step="5">
+                        <span class="slider-value" id="volatilityDisplay">80%</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Staking Yield (%)</label>
+                    <div class="slider-container">
+                        <input type="range" id="stakingYield" min="0" max="15" value="7.5" step="0.5">
+                        <span class="slider-value" id="stakingYieldDisplay">7.5%</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Simulations</label>
+                    <div class="slider-container">
+                        <input type="range" id="numSims" min="100" max="5000" value="1000" step="100">
+                        <span class="slider-value" id="numSimsDisplay">1,000</span>
+                    </div>
+                </div>
+
+                <button class="btn" id="runSimulation" style="width: 100%; margin-top: 15px;">Run Simulation</button>
+            </div>
+
+            <div class="output-section">
+                <h2>Results</h2>
+
+                <div class="results-grid">
+                    <div class="result-item">
+                        <div class="label">Median Value</div>
+                        <div class="value" id="medianValue">-</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="label">Mean Value</div>
+                        <div class="value" id="meanValue">-</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="label">5th Percentile</div>
+                        <div class="value warning" id="p5Value">-</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="label">95th Percentile</div>
+                        <div class="value" id="p95Value">-</div>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 20px;">Probability Analysis</h3>
+                <table>
+                    <tr><td>P(2x Return)</td><td id="prob2x">-</td></tr>
+                    <tr><td>P(5x Return)</td><td id="prob5x">-</td></tr>
+                    <tr><td>P(10x Return)</td><td id="prob10x">-</td></tr>
+                    <tr><td>P(Loss)</td><td id="probLoss">-</td></tr>
+                </table>
+
+                <h3 style="margin-top: 20px;">Risk Metrics</h3>
+                <table>
+                    <tr><td>VaR (95%)</td><td id="var95">-</td></tr>
+                    <tr><td>CVaR (95%)</td><td id="cvar95">-</td></tr>
+                    <tr><td>Sharpe Ratio</td><td id="sharpe">-</td></tr>
+                    <tr><td>Max Drawdown</td><td id="maxDrawdown">-</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top: 20px;">
+            <h2>Price Path Distribution (Fan Chart)</h2>
+            <div class="chart-container" style="height: 400px;">
+                <canvas id="fanChart"></canvas>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top: 20px;">
+            <h2>Final Value Distribution</h2>
+            <div class="chart-container" style="height: 300px;">
+                <canvas id="histChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>SOL Staking Calculator | <a href="https://github.com/Digital-AI-Finance/solana-staking">GitHub</a></p>
+        <p>Merton Jump-Diffusion Model. All calculations run client-side.</p>
+    </footer>
+
+    <script src="../js/utils.js"></script>
+    <script>
+        let fanChart = null;
+        let histChart = null;
+
+        // Merton Jump-Diffusion simulation
+        function simulatePath(S0, mu, sigma, T, steps, lambda = 3, jumpMean = -0.1, jumpStd = 0.15) {
+            const dt = T / steps;
+            const path = [S0];
+            let S = S0;
+
+            for (let i = 0; i < steps; i++) {
+                const dW = randomNormal() * Math.sqrt(dt);
+                const numJumps = randomPoisson(lambda * dt);
+                let jumpSum = 0;
+                for (let j = 0; j < numJumps; j++) {
+                    jumpSum += randomNormal(jumpMean, jumpStd);
+                }
+
+                const drift = (mu - 0.5 * sigma * sigma - lambda * (Math.exp(jumpMean + 0.5 * jumpStd * jumpStd) - 1)) * dt;
+                S = S * Math.exp(drift + sigma * dW + jumpSum);
+                path.push(Math.max(S, 0.01)); // Floor at $0.01
+            }
+            return path;
+        }
+
+        // DCA strategy
+        function simulateDCA(capital, prices, stakingYield) {
+            const monthlyInvest = capital / prices.length;
+            let totalSOL = 0;
+
+            for (let i = 0; i < prices.length; i++) {
+                const solBought = monthlyInvest / prices[i];
+                totalSOL += solBought;
+                // Compound staking monthly
+                totalSOL *= (1 + stakingYield / 12);
+            }
+
+            return totalSOL * prices[prices.length - 1];
+        }
+
+        // Value averaging strategy
+        function simulateValueAvg(capital, prices, stakingYield) {
+            const targetGrowth = capital / prices.length;
+            let totalSOL = 0;
+            let totalInvested = 0;
+
+            for (let i = 0; i < prices.length; i++) {
+                const targetValue = targetGrowth * (i + 1);
+                const currentValue = totalSOL * prices[i];
+                const toInvest = Math.max(0, Math.min(targetValue - currentValue, capital - totalInvested));
+
+                if (toInvest > 0) {
+                    totalSOL += toInvest / prices[i];
+                    totalInvested += toInvest;
+                }
+                totalSOL *= (1 + stakingYield / 12);
+            }
+
+            return totalSOL * prices[prices.length - 1];
+        }
+
+        function runSimulation() {
+            const capital = parseFloat(document.getElementById('initialCapital').value);
+            const strategy = document.getElementById('strategy').value;
+            const T = parseFloat(document.getElementById('timeHorizon').value);
+            const mu = parseFloat(document.getElementById('expectedReturn').value) / 100;
+            const sigma = parseFloat(document.getElementById('volatility').value) / 100;
+            const stakingYield = parseFloat(document.getElementById('stakingYield').value) / 100;
+            const numSims = parseInt(document.getElementById('numSims').value);
+
+            const S0 = 150; // Current SOL price
+            const steps = T * 12; // Monthly steps
+            const allPaths = [];
+            const finalValues = [];
+
+            // Run simulations
+            for (let sim = 0; sim < numSims; sim++) {
+                const path = simulatePath(S0, mu, sigma, T, steps);
+                allPaths.push(path);
+
+                let finalValue;
+                if (strategy === 'lump_sum') {
+                    const solBought = capital / S0;
+                    const compoundedSOL = solBought * Math.pow(1 + stakingYield, T);
+                    finalValue = compoundedSOL * path[path.length - 1];
+                } else if (strategy === 'dca') {
+                    finalValue = simulateDCA(capital, path, stakingYield);
+                } else {
+                    finalValue = simulateValueAvg(capital, path, stakingYield);
+                }
+                finalValues.push(finalValue);
+            }
+
+            // Calculate statistics
+            const sortedValues = [...finalValues].sort((a, b) => a - b);
+            const medianVal = percentile(finalValues, 50);
+            const meanVal = mean(finalValues);
+            const p5 = percentile(finalValues, 5);
+            const p95 = percentile(finalValues, 95);
+
+            // Probabilities
+            const prob2x = finalValues.filter(v => v >= capital * 2).length / numSims;
+            const prob5x = finalValues.filter(v => v >= capital * 5).length / numSims;
+            const prob10x = finalValues.filter(v => v >= capital * 10).length / numSims;
+            const probLoss = finalValues.filter(v => v < capital).length / numSims;
+
+            // Risk metrics
+            const returns = finalValues.map(v => (v - capital) / capital);
+            const var95 = capital - percentile(finalValues, 5);
+            const cvar95Vals = finalValues.filter(v => v <= percentile(finalValues, 5));
+            const cvar95 = cvar95Vals.length > 0 ? capital - mean(cvar95Vals) : var95;
+            const sharpe = (mean(returns) - 0.045 * T) / std(returns);
+
+            // Max drawdown (from paths)
+            let maxDD = 0;
+            for (const path of allPaths.slice(0, 100)) { // Sample for performance
+                let peak = path[0];
+                for (const price of path) {
+                    if (price > peak) peak = price;
+                    const dd = (peak - price) / peak;
+                    if (dd > maxDD) maxDD = dd;
+                }
+            }
+
+            // Update display
+            document.getElementById('medianValue').textContent = formatCurrency(medianVal);
+            document.getElementById('meanValue').textContent = formatCurrency(meanVal);
+            document.getElementById('p5Value').textContent = formatCurrency(p5);
+            document.getElementById('p95Value').textContent = formatCurrency(p95);
+
+            document.getElementById('prob2x').textContent = formatPercent(prob2x);
+            document.getElementById('prob5x').textContent = formatPercent(prob5x);
+            document.getElementById('prob10x').textContent = formatPercent(prob10x);
+            document.getElementById('probLoss').textContent = formatPercent(probLoss);
+
+            document.getElementById('var95').textContent = formatCurrency(var95);
+            document.getElementById('cvar95').textContent = formatCurrency(cvar95);
+            document.getElementById('sharpe').textContent = sharpe.toFixed(2);
+            document.getElementById('maxDrawdown').textContent = formatPercent(maxDD);
+
+            // Update charts
+            updateFanChart(allPaths, T);
+            updateHistChart(finalValues, capital);
+        }
+
+        function updateFanChart(allPaths, T) {
+            const steps = allPaths[0].length;
+            const labels = [];
+            for (let i = 0; i <= steps; i++) {
+                labels.push((i / 12).toFixed(1) + 'y');
+            }
+
+            // Calculate percentiles at each time step
+            const p5 = [], p25 = [], p50 = [], p75 = [], p95 = [];
+            for (let t = 0; t < steps + 1; t++) {
+                const values = allPaths.map(p => p[t]);
+                p5.push(percentile(values, 5));
+                p25.push(percentile(values, 25));
+                p50.push(percentile(values, 50));
+                p75.push(percentile(values, 75));
+                p95.push(percentile(values, 95));
+            }
+
+            if (fanChart) fanChart.destroy();
+
+            const ctx = document.getElementById('fanChart').getContext('2d');
+            fanChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: '95th Percentile',
+                            data: p95,
+                            borderColor: 'rgba(153, 69, 255, 0.3)',
+                            backgroundColor: 'transparent',
+                            borderWidth: 1,
+                            pointRadius: 0
+                        },
+                        {
+                            label: '75th Percentile',
+                            data: p75,
+                            borderColor: 'rgba(153, 69, 255, 0.5)',
+                            backgroundColor: 'rgba(153, 69, 255, 0.1)',
+                            fill: '-1',
+                            borderWidth: 1,
+                            pointRadius: 0
+                        },
+                        {
+                            label: 'Median',
+                            data: p50,
+                            borderColor: solanaColors.purple,
+                            backgroundColor: 'rgba(153, 69, 255, 0.2)',
+                            fill: '-1',
+                            borderWidth: 3,
+                            pointRadius: 0
+                        },
+                        {
+                            label: '25th Percentile',
+                            data: p25,
+                            borderColor: 'rgba(153, 69, 255, 0.5)',
+                            backgroundColor: 'rgba(153, 69, 255, 0.2)',
+                            fill: '-1',
+                            borderWidth: 1,
+                            pointRadius: 0
+                        },
+                        {
+                            label: '5th Percentile',
+                            data: p5,
+                            borderColor: 'rgba(153, 69, 255, 0.3)',
+                            backgroundColor: 'rgba(153, 69, 255, 0.1)',
+                            fill: '-1',
+                            borderWidth: 1,
+                            pointRadius: 0
+                        }
+                    ]
+                },
+                options: {
+                    ...chartDefaults,
+                    scales: {
+                        x: { ...chartDefaults.scales.x, title: { display: true, text: 'Time', color: '#8B949E' } },
+                        y: { ...chartDefaults.scales.y, title: { display: true, text: 'SOL Price ($)', color: '#8B949E' } }
+                    }
+                }
+            });
+        }
+
+        function updateHistChart(finalValues, capital) {
+            // Create histogram bins
+            const minVal = Math.min(...finalValues);
+            const maxVal = Math.max(...finalValues);
+            const numBins = 30;
+            const binWidth = (maxVal - minVal) / numBins;
+            const bins = [];
+            const counts = new Array(numBins).fill(0);
+
+            for (let i = 0; i < numBins; i++) {
+                bins.push(((minVal + i * binWidth) / 1000).toFixed(0) + 'K');
+            }
+
+            for (const val of finalValues) {
+                const binIndex = Math.min(Math.floor((val - minVal) / binWidth), numBins - 1);
+                counts[binIndex]++;
+            }
+
+            if (histChart) histChart.destroy();
+
+            const ctx = document.getElementById('histChart').getContext('2d');
+            histChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: bins,
+                    datasets: [{
+                        label: 'Frequency',
+                        data: counts,
+                        backgroundColor: counts.map((_, i) => {
+                            const binValue = minVal + i * binWidth;
+                            return binValue < capital ? 'rgba(248, 81, 73, 0.6)' : 'rgba(20, 241, 149, 0.6)';
+                        }),
+                        borderColor: counts.map((_, i) => {
+                            const binValue = minVal + i * binWidth;
+                            return binValue < capital ? solanaColors.red : solanaColors.green;
+                        }),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    ...chartDefaults,
+                    scales: {
+                        x: { ...chartDefaults.scales.x, title: { display: true, text: 'Final Portfolio Value ($)', color: '#8B949E' } },
+                        y: { ...chartDefaults.scales.y, title: { display: true, text: 'Frequency', color: '#8B949E' } }
+                    }
+                }
+            });
+        }
+
+        function setupSliders() {
+            const sliders = [
+                { id: 'initialCapital', displayId: 'initialCapitalDisplay', format: v => '$' + formatNumber(v) },
+                { id: 'timeHorizon', displayId: 'timeHorizonDisplay', format: v => v + ' years' },
+                { id: 'expectedReturn', displayId: 'expectedReturnDisplay', format: v => v + '%' },
+                { id: 'volatility', displayId: 'volatilityDisplay', format: v => v + '%' },
+                { id: 'stakingYield', displayId: 'stakingYieldDisplay', format: v => v + '%' },
+                { id: 'numSims', displayId: 'numSimsDisplay', format: v => formatNumber(v) }
+            ];
+
+            sliders.forEach(({ id, displayId, format }) => {
+                const slider = document.getElementById(id);
+                slider.addEventListener('input', () => {
+                    document.getElementById(displayId).textContent = format(parseFloat(slider.value));
+                });
+            });
+
+            document.getElementById('runSimulation').addEventListener('click', runSimulation);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setupSliders();
+            runSimulation();
+        });
+    </script>
+</body>
+</html>
