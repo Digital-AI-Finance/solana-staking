@@ -237,6 +237,13 @@ Where $D(c)$ is delegation demand as a function of commission rate.
 \bottomnote{Source: Strategy Inc. investor presentations, SEC filings.}
 \end{frame}
 
+\begin{frame}[t]{MicroStrategy: BTC vs SOL Accumulation}
+\begin{center}
+\includegraphics[width=0.55\textwidth]{../charts/03a_mstr_btc_comparison/chart.pdf}
+\end{center}
+\bottomnote{Same capital, same strategy applied to SOL yields additional staking income.}
+\end{frame}
+
 \begin{frame}[t]{Convertible Bond Structure}
 \textbf{Zero-Coupon Convertible Mechanics}
 \begin{itemize}
@@ -301,6 +308,13 @@ Where $D(c)$ is delegation demand as a function of commission rate.
     \item Flexible terms negotiation
 \end{itemize}
 \bottomnote{PIPEs complement convertibles for capital raising flexibility.}
+\end{frame}
+
+\begin{frame}[t]{PIPE Capital Flow Structure}
+\begin{center}
+\includegraphics[width=0.65\textwidth]{../charts/05_pipe_structure/chart.pdf}
+\end{center}
+\bottomnote{Institutional capital flows through PIPE to fund SOL treasury accumulation.}
 \end{frame}
 
 %=============================================================================
@@ -403,6 +417,13 @@ Where $D(c)$ is delegation demand as a function of commission rate.
 \bottomnote{Trade unlimited upside for immediate premium income.}
 \end{frame}
 
+\begin{frame}[t]{Collar Strategy: Defined Risk Range}
+\begin{center}
+\includegraphics[width=0.65\textwidth]{../charts/08c_collar_strategy/chart.pdf}
+\end{center}
+\bottomnote{Long put + short call creates bounded payoff profile for treasuries.}
+\end{frame}
+
 \begin{frame}[t]{Covered Call Mathematics}
 \textbf{Position Composition}
 \begin{itemize}
@@ -440,6 +461,13 @@ Where $D(c)$ is delegation demand as a function of commission rate.
     \item If SOL stays above \$120: Keep \$8 premium (6.7\% yield)
 \end{itemize}
 \bottomnote{Systematic put selling accumulates SOL at progressively lower prices.}
+\end{frame}
+
+\begin{frame}[t]{Cash-Secured Put Payoff}
+\begin{center}
+\includegraphics[width=0.65\textwidth]{../charts/08b_cash_secured_put/chart.pdf}
+\end{center}
+\bottomnote{Win-win: Either accumulate SOL at discount or keep premium.}
 \end{frame}
 
 %=============================================================================
@@ -525,6 +553,76 @@ Where $D(c)$ is delegation demand as a function of commission rate.
 \bottomnote{Combine technical, fundamental, and macro signals for entry timing.}
 \end{frame}
 
+\begin{frame}[t]{Technical Indicators: RSI \& MACD}
+\begin{center}
+\includegraphics[width=0.55\textwidth]{../charts/07a_technical_indicators/chart.pdf}
+\end{center}
+\bottomnote{RSI < 30 combined with MACD crossover signals high-probability entries.}
+\end{frame}
+
+\begin{frame}[t]{Historical Entry Point Analysis}
+\begin{center}
+\includegraphics[width=0.55\textwidth]{../charts/07b_scenario_analysis/chart.pdf}
+\end{center}
+\bottomnote{Backtesting shows 70-75\% win rate on RSI < 30 signals over 24 months.}
+\end{frame}
+
+\begin{frame}[t]{Volatility Regime Classification}
+\begin{center}
+\includegraphics[width=0.55\textwidth]{../charts/07c_volatility_regimes/chart.pdf}
+\end{center}
+\bottomnote{Adjust position sizing based on volatility regime: 1.5x low, 1.0x medium, 0.5x high.}
+\end{frame}
+
+\begin{frame}[t]{Signal Weighting Framework}
+\textbf{Technical Weight (40\%)}
+\begin{itemize}
+\item RSI < 30: +20\%
+\item MACD bullish cross: +10\%
+\item Below 200-day MA: +10\%
+\end{itemize}
+\vspace{0.2cm}
+\textbf{Volatility Weight (30\%)}
+\begin{itemize}
+\item Low vol regime: +15\% (larger position)
+\item High vol regime: -15\% (smaller position)
+\end{itemize}
+\vspace{0.2cm}
+\textbf{Fundamental Weight (30\%)}
+\begin{itemize}
+\item Staking ratio rising: +15\%
+\item TVL growth: +15\%
+\end{itemize}
+\bottomnote{Combined score > 60\% triggers opportunistic buy signal.}
+\end{frame}
+
+\begin{frame}[t]{Backtesting Results}
+\begin{center}
+\includegraphics[width=0.55\textwidth]{../charts/07d_backtest_results/chart.pdf}
+\end{center}
+\bottomnote{RSI + Volatility filter achieves 85\% win rate with 14\% max drawdown.}
+\end{frame}
+
+\begin{frame}[t]{Risk-Adjusted Entry Sizing}
+\textbf{Position Size Formula}
+\begin{equation}
+\text{Size} = \frac{\text{Risk Capital} \times \text{Signal Score}}{\text{Vol Multiplier} \times \text{ATR}}
+\end{equation}
+
+\textbf{Example Calculation}
+\begin{itemize}
+\item Risk capital: \$100K allocated to SOL
+\item Signal score: 75\% (strong buy signal)
+\item Vol multiplier: 1.5 (low vol regime)
+\item ATR: \$8 (14-day average true range)
+\end{itemize}
+
+\begin{equation}
+\text{Size} = \frac{\$100K \times 0.75}{1.5 \times 8} = \$6,250 \text{ per entry}
+\end{equation}
+\bottomnote{Scale entries based on signal strength and market conditions.}
+\end{frame}
+
 \begin{frame}[t]{DCA vs Opportunistic Buying}
 \textbf{Dollar Cost Averaging (DCA)}
 \begin{itemize}
@@ -555,7 +653,7 @@ Where $D(c)$ is delegation demand as a function of commission rate.
 
 \begin{frame}[t]{Integrated Strategy}
 \begin{center}
-\includegraphics[width=0.60\textwidth]{../charts/11_hybrid_model_flow/chart.pdf}
+\includegraphics[width=0.45\textwidth]{../charts/11_hybrid_model_flow/chart.pdf}
 \end{center}
 \bottomnote{Combine validator operations with corporate capital structure for maximum yield.}
 \end{frame}
